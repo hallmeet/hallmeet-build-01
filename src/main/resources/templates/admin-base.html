@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard - HallMeet</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <!-- Modern Theme - 25px Radius -->
+    <link rel="stylesheet" href="/css/modern-theme.css">
+    <!-- Custom CSS -->
+    <style>
+        .main-header .navbar-nav .nav-link {
+            padding: 0.5rem 1rem;
+        }
+
+        /* Sidebar Modern Styling */
+        .main-sidebar {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 25px;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Subtle borders inside sidebar */
+        .main-sidebar .brand-link,
+        .main-sidebar .user-panel {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* Nav link hover effects and spacing */
+        .main-sidebar .nav-sidebar .nav-item .nav-link {
+            border-radius: 12px;
+            margin: 4px 10px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            color: #cbd5e1 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .main-sidebar .nav-sidebar .nav-item .nav-link p {
+            margin-bottom: 0 !important;
+            margin-left: 10px !important;
+            line-height: 1 !important;
+        }
+
+        .main-sidebar .nav-sidebar .nav-item .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+            transform: translateX(5px);
+        }
+
+        .main-sidebar .nav-sidebar .nav-item .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+
+        .main-sidebar .nav-sidebar .nav-link.active .nav-icon {
+            color: #60a5fa !important;
+        }
+
+        .main-sidebar .nav-sidebar .nav-icon {
+            color: #94a3b8;
+            width: 25px !important;
+            text-align: center !important;
+            font-size: 1.1rem !important;
+            margin-right: 0 !important;
+        }
+
+        /* Fix for sidebar-mini alignment */
+        .sidebar-mini.sidebar-collapse .main-sidebar .nav-sidebar .nav-link {
+            justify-content: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 5px !important;
+            margin-right: 5px !important;
+        }
+
+        /* Center user panel icon in mini sidebar */
+        .sidebar-mini.sidebar-collapse .main-sidebar .user-panel {
+            padding-left: 0 !important;
+            justify-content: center !important;
+        }
+
+        .sidebar-mini.sidebar-collapse .main-sidebar .user-panel .image {
+            padding-left: 0 !important;
+            margin: 0 auto !important;
+            display: flex !important;
+            justify-content: center !important;
+        }
+
+        /* Center brand icon in mini sidebar */
+        .sidebar-mini.sidebar-collapse .main-sidebar .brand-link {
+            justify-content: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        .sidebar-mini.sidebar-collapse .main-sidebar .brand-link i {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        .main-sidebar .nav-sidebar .nav-link:hover .nav-icon,
+        .main-sidebar .nav-sidebar .nav-link.active .nav-icon {
+            color: #60a5fa;
+        }
+
+        /* Adjust content transition to match rounded corners */
+        @media (min-width: 768px) {
+
+            body:not(.sidebar-collapse) .content-wrapper,
+            body:not(.sidebar-collapse) .main-footer,
+            body:not(.sidebar-collapse) .main-header {
+                margin-left: 260px;
+                /* Slight buffer for the curved edge */
+            }
+
+            .main-sidebar {
+                width: 250px;
+            }
+        }
+
+        /* Dropdown Menu Modern Styling */
+        .dropdown-menu-lg {
+            border-radius: 20px !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+            padding: 4px !important;
+            margin-top: 8px !important;
+            min-width: 160px !important;
+            max-width: 200px !important;
+            overflow: hidden;
+            animation: fadeInScale 0.2s ease-out;
+        }
+
+        .dropdown-item {
+            border-radius: 12px !important;
+            padding: 6px 12px !important;
+            margin: 1px 0;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background-color: #DBEAFE !important;
+            color: #1E40AF !important;
+            transform: scale(1.02);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                <!-- Logout Button (Quick Access) -->
+                <li class="nav-item" th:if="${session.loggedIn}">
+                    <a href="/logout" class="nav-link logout-link" 
+                        style="background-color: #FEE2E2; color: #DC2626; border-radius: 9999px; padding: 6px 14px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; margin-right: 10px; transition: all 0.2s;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+                <!-- User Profile -->
+                <li class="nav-item dropdown" th:if="${session.loggedIn}">
+                    <a class="nav-link" data-toggle="dropdown" href="#"
+                        style="background-color: #DBEAFE; color: #1E40AF; border-radius: 9999px; padding: 6px 16px; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="far fa-user"></i>
+                        <span th:text="${user != null ? user.fullName : (session.fullName ?: (session.username ?: 'Admin'))}"></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <div class="dropdown-header text-center">User Session</div>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item logout-link text-danger">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo - Non-clickable as requested -->
+            <div class="brand-link"
+                style="display: flex; align-items: center; padding: 0.8rem 1rem; cursor: default; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <i class="fas fa-ticket-alt"
+                    style="font-size: 1.5rem; color: #3B82F6; margin-right: 0.5rem; filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5));"></i>
+                <span class="brand-text"
+                    style="font-weight: 700; font-size: 1.25rem; color: #ffffff; letter-spacing: 0.5px;">HallMeet</span>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel -->
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center" th:if="${session.loggedIn}"
+                    style="overflow: visible;">
+                    <div class="image" style="padding-left: 0.8rem; display: flex; align-items: center;">
+                        <i class="fas fa-user-circle fa-2x text-white"
+                            style="line-height: 1; vertical-align: middle;"></i>
+                    </div>
+                    <div class="info" style="padding-left: 10px;">
+                        <a href="#" class="d-block" style="color: #ffffff; font-weight: 500; font-size: 0.95rem;"
+                            th:text="${user != null ? user.fullName : (session.fullName ?: (session.username ?: 'Admin'))}"></a>
+                    </div>
+                </div>
+
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+                        <!-- Dashboard -->
+                        <li class="nav-item">
+                            <a href="/Alogin" class="nav-link">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <!-- Students -->
+                        <li class="nav-item">
+                            <a href="/StudentList_form" class="nav-link">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Students</p>
+                            </a>
+                        </li>
+
+                        <!-- Colleges -->
+                        <li class="nav-item">
+                            <a href="/collegeList-form" class="nav-link">
+                                <i class="nav-icon fas fa-university"></i>
+                                <p>Institutes</p>
+                            </a>
+                        </li>
+
+                        <!-- Syllabus -->
+                        <li class="nav-item">
+                            <a href="/Subject-form" class="nav-link">
+                                <i class="nav-icon fas fa-book"></i>
+                                <p>Syllabus</p>
+                            </a>
+                        </li>
+
+                        <!-- Exams -->
+                        <li class="nav-item">
+                            <a href="/exam-form" class="nav-link">
+                                <i class="nav-icon fas fa-clipboard-list"></i>
+                                <p>Exams</p>
+                            </a>
+                        </li>
+
+                        <!-- Hall Tickets -->
+                        <li class="nav-item">
+                            <a href="/hall-form" class="nav-link">
+                                <i class="nav-icon fas fa-ticket-alt"></i>
+                                <p>Hall Tickets</p>
+                            </a>
+                        </li>
+
+                        <!-- Divider -->
+                        <li class="nav-header">ACCOUNT</li>
+                        <li class="nav-item">
+                            <a href="/logout" class="nav-link logout-link"
+                                style="background: rgba(239, 68, 68, 0.15); color: #f87171 !important; margin-top: 10px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                <i class="nav-icon fas fa-sign-out-alt" style="color: #f87171;"></i>
+                                <p style="font-weight: 600;">Logout</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Content Header -->
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0" th:text="${pageTitle ?: 'Dashboard'}">Dashboard</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right" th:if="${breadcrumbs}">
+                                <li class="breadcrumb-item" th:each="crumb, iterStat : ${breadcrumbs}"
+                                    th:classappend="${iterStat.last} ? 'active' : ''">
+                                    <a th:if="${!iterStat.last}" th:href="${crumb.url}" th:text="${crumb.name}"></a>
+                                    <span th:if="${iterStat.last}" th:text="${crumb.name}"></span>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    <!-- Flash Messages -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span th:text="${success}"></span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span th:text="${warning}"></span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <!-- Page Content -->
+                    <div th:replace="${content}"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <strong>Copyright &copy; 2026 <a href="/about">HallMeet</a>.</strong>
+            All rights reserved.
+        </footer>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(function () {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function (alert) {
+                    if (typeof $ !== 'undefined' && $.fn.alert) {
+                        $(alert).alert('close');
+                    } else {
+                        alert.style.display = 'none';
+                    }
+                });
+            }, 5000);
+
+            // Logout Confirmation Alert
+            const logoutLinks = document.querySelectorAll('.logout-link');
+            logoutLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    if (!confirm("Confirm Logout Process? \n\nAre you sure you want to terminate your current session? Any unsaved changes may be lost.")) {
+                        e.preventDefault();
+                    } else {
+                        // Show a quick "alert of resubmission" as requested by user
+                        alert("Logout verified. Processing session termination...");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HallMeet - Hall Ticket Generation System</title>
+
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <!-- Modern Theme (Premium Styling) -->
+    <link rel="stylesheet" href="/css/modern-theme.css">
+
+    <style>
+        body {
+            font-family: 'Inter', 'Source Sans Pro', sans-serif;
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            background: #f0f2f5;
+        }
+
+        /* ── Cursor BG ── */
+        .cursor-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; transition: background 0.3s ease; }
+
+        /* ── Pill Navbar ── */
+        .custom-pill-nav-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            z-index: 1000;
+        }
+        .main-pill-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 98%;
+            max-width: 1920px;
+        }
+        .brand-pill {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 10px 25px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+        }
+        .brand-pill a {
+            color: #ffffff;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            cursor: default;
+        }
+        .options-pill {
+            background: #ffffff;
+            padding: 8px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s ease;
+        }
+        .options-pill.hidden {
+            opacity: 0;
+            transform: translateY(-15px) scale(0.95);
+            pointer-events: none;
+            position: absolute;
+            right: 20px;
+        }
+        .colorful-pill-btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+        }
+        .colorful-pill-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            color: #ffffff !important;
+        }
+        .btn-opt-1 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); color: #333 !important; }
+        .btn-opt-1:hover { color: #333 !important; }
+        .btn-opt-2 { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+        .btn-opt-3 { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #0f172a !important; }
+        .btn-opt-3:hover { color: #0f172a !important; }
+        .btn-opt-4 { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); }
+
+        /* ── Back Button ── */
+        .back-btn {
+            display: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #334155;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.08);
+            cursor: pointer;
+            font-size: 0.95rem;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .back-btn.visible { display: inline-flex; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Home Content ── */
+        .home-content {
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+        .home-content.hidden { display: none; }
+
+        /* ── Split View (Active State) ── */
+        .split-view {
+            display: none;
+            min-height: calc(100vh - 120px);
+            padding: 20px 40px;
+            position: relative;
+            z-index: 1;
+        }
+        .split-view.active {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+        .split-left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .split-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            border-radius: 30px;
+            margin: 10px;
+        }
+        .split-right.register-bg { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+        .split-right.student-bg  { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+        .split-right.admin-bg    { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); }
+
+        .right-content { text-align: center; color: #fff; }
+        .right-content i { font-size: 5rem; margin-bottom: 24px; opacity: 0.9; }
+        .right-content h2 { font-size: 3rem; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 12px; }
+        .right-content p { font-size: 1.1rem; opacity: 0.9; max-width: 350px; margin: 0 auto; }
+
+        /* Form Card */
+        .form-card {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 20px;
+            padding: 20px 24px;
+            width: 100%;
+            max-width: 370px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        }
+        .form-card h3 { font-size: 1.2rem; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+        .form-card .form-subtitle { color: #64748b; margin-bottom: 14px; font-size: 0.85rem; }
+        .form-group-custom { margin-bottom: 8px; }
+        .form-group-custom label { display: block; font-size: 0.78rem; font-weight: 600; color: #475569; margin-bottom: 3px; }
+        .form-input-custom {
+            width: 100%; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+            font-size: 0.85rem; font-family: 'Inter', sans-serif; transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none; background: #fff;
+        }
+        .form-input-custom:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1); }
+        .form-input-custom::placeholder { color: #94a3b8; }
+        .submit-btn-custom {
+            width: 100%; padding: 9px; border: none; border-radius: 10px; font-size: 0.9rem;
+            font-weight: 700; color: #fff; cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-family: 'Inter', sans-serif; margin-top: 4px;
+        }
+        .submit-btn-custom:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .submit-btn-custom.register-btn { background: linear-gradient(135deg, #f6d365, #fda085); }
+        .submit-btn-custom.student-btn  { background: linear-gradient(135deg, #84fab0, #8fd3f4); color: #0f172a; }
+        .submit-btn-custom.admin-btn    { background: linear-gradient(135deg, #ff0844, #ffb199); }
+        .input-wrapper { position: relative; }
+        .input-wrapper .toggle-eye {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: #94a3b8; font-size: 1rem;
+        }
+        .input-wrapper .toggle-eye:hover { color: #475569; }
+
+        @media (max-width: 768px) {
+            .main-pill-container { flex-direction: column; border-radius: 25px; gap: 15px; }
+            .options-pill { flex-wrap: wrap; justify-content: center; border-radius: 25px; }
+            .split-view.active { flex-direction: column; padding: 10px 16px; }
+            .split-left, .split-right { padding: 20px; }
+            .right-content h2 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cursor-following background -->
+    <div class="cursor-bg" id="cursorBg"></div>
+
+    <!-- ═══════ PILL NAVBAR ═══════ -->
+    <div class="custom-pill-nav-wrapper">
+        <div class="main-pill-container">
+            <!-- Brand Pill (always visible, not clickable) -->
+            <div class="brand-pill" id="brandPill">
+                <a href="/">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>HallMeet</span>
+                </a>
+            </div>
+
+            <!-- Options Pill (visible in initial state) -->
+            <div class="options-pill" id="optionsPill">
+                <a href="/" class="colorful-pill-btn btn-opt-1">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <button class="colorful-pill-btn btn-opt-2" onclick="showSection('register')">
+                    <i class="fas fa-user-plus"></i> Student Registration
+                </button>
+                <button class="colorful-pill-btn btn-opt-3" onclick="showSection('student')">
+                    <i class="fas fa-sign-in-alt"></i> Student Login
+                </button>
+                <button class="colorful-pill-btn btn-opt-4" onclick="showSection('admin')">
+                    <i class="fas fa-user-shield"></i> Admin Login
+                </button>
+            </div>
+
+            <!-- Back Button (visible in active state) -->
+            <button class="back-btn" id="backBtn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════ HOME CONTENT (Original Design) ═══════ -->
+    <div class="home-content" id="homeContent">
+        <div style="padding: 2rem 0;">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-sm-12 text-center">
+                        <h1 class="mb-3" style="font-size: 2.5rem; font-weight: 600;">
+                            <i class="fas fa-ticket-alt text-primary mr-2"></i>
+                            Hall Ticket Generation System
+                        </h1>
+                        <p class="lead text-muted">Manage student hall tickets with QR code generation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 2rem 0;">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-lg-12">
+                        <div class="card card-primary card-outline shadow-sm">
+                            <div class="card-body p-4">
+                                <h4 class="card-title mb-3">
+                                    <i class="fas fa-info-circle mr-2"></i>Welcome to HallMeet
+                                </h4>
+                                <p class="card-text lead">
+                                    A comprehensive system for managing student hall tickets with QR code generation.
+                                    Students can apply for exams and receive digital hall tickets with QR codes for easy verification.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card card-primary card-outline shadow-sm h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="card-title mb-0">
+                                    <i class="fas fa-user-graduate mr-2"></i>For Students
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3">Register and login to apply for exams and view your hall tickets.</p>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" onclick="showSection('register')">
+                                        <i class="fas fa-user-plus mr-2"></i>Register
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="showSection('student')">
+                                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card card-success card-outline shadow-sm h-100">
+                            <div class="card-header bg-success text-white">
+                                <h4 class="card-title mb-0">
+                                    <i class="fas fa-user-shield mr-2"></i>For Administrators
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3">Manage students, exams, and generate hall tickets with QR codes.</p>
+                                <div class="d-grid">
+                                    <button class="btn btn-success" onclick="showSection('admin')">
+                                        <i class="fas fa-sign-in-alt mr-2"></i>Admin Login
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card card-info card-outline shadow-sm h-100">
+                            <div class="card-header bg-info text-white">
+                                <h4 class="card-title mb-0">
+                                    <i class="fas fa-qrcode mr-2"></i>Features
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>QR Code Generation</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Digital Hall Tickets</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Exam Management</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Student Management</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ SPLIT VIEW: Register Student ═══════ -->
+    <div class="split-view" id="section-register">
+        <div class="split-left">
+            <div class="form-card">
+                <h3><i class="fas fa-user-plus" style="color: #f59e0b; margin-right: 10px;"></i>Register</h3>
+                <p class="form-subtitle">Create your student account</p>
+                
+                <!-- Registration Alert -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+                
+                <form method="post" th:action="@{/createUser}">
+                    <input type="hidden" name="formToken" th:value="${formToken}">
+                    <div class="form-group-custom">
+                        <label>Full Name</label>
+                        <input type="text" name="fullName" class="form-input-custom" placeholder="Enter your full name" required minlength="3" maxlength="100">
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Email Address</label>
+                        <input type="email" name="email" class="form-input-custom" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="password" id="regPwd" class="form-input-custom" placeholder="Create a password" required minlength="8" maxlength="50">
+                            <i class="fas fa-eye toggle-eye" onclick="togglePwd('regPwd', this)"></i>
+                        </div>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Mobile Number</label>
+                        <input type="tel" name="mobileNo" class="form-input-custom" placeholder="10-digit mobile number" required minlength="10" maxlength="10" pattern="[0-9]{10}">
+                    </div>
+                    <button type="submit" class="submit-btn-custom register-btn">
+                        <i class="fas fa-user-plus"></i> Register Now
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="split-right register-bg">
+            <div class="right-content">
+                <i class="fas fa-user-graduate"></i>
+                <h2>Student Registration</h2>
+                <p>Join HallMeet to apply for exams and receive your digital hall tickets</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ SPLIT VIEW: Student Login ═══════ -->
+    <div class="split-view" id="section-student">
+        <div class="split-left">
+            <div class="form-card">
+                <h3><i class="fas fa-sign-in-alt" style="color: #10b981; margin-right: 10px;"></i>Student Login</h3>
+                <p class="form-subtitle">Sign in to your student account</p>
+                
+                <!-- Student Login Alert -->
+                <div th:if="${loginError}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <span th:text="${loginError}"></span>
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+
+                <form th:action="@{/signin}" method="post">
+                    <div class="form-group-custom">
+                        <label>Email Address</label>
+                        <input type="email" name="username" class="form-input-custom" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="password" id="studentPwd" class="form-input-custom" placeholder="Enter your password" required>
+                            <i class="fas fa-eye toggle-eye" onclick="togglePwd('studentPwd', this)"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn-custom student-btn">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="split-right student-bg">
+            <div class="right-content">
+                <i class="fas fa-id-card"></i>
+                <h2>Student Login</h2>
+                <p>Access your dashboard, view exams, and download your hall tickets</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ SPLIT VIEW: Admin Login ═══════ -->
+    <div class="split-view" id="section-admin">
+        <div class="split-left">
+            <div class="form-card">
+                <h3><i class="fas fa-user-shield" style="color: #ef4444; margin-right: 10px;"></i>Admin Login</h3>
+                <p class="form-subtitle">Sign in as Administrator</p>
+                
+                <!-- Admin Login Alert -->
+                <div th:if="${loginError}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <span th:text="${loginError}"></span>
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+
+                <form th:action="@{/Alogin}" method="post">
+                    <div class="form-group-custom">
+                        <label>Email Address</label>
+                        <input type="email" name="username" class="form-input-custom" placeholder="Admin email" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="password" id="adminPwd" class="form-input-custom" placeholder="Admin password" required>
+                            <i class="fas fa-eye toggle-eye" onclick="togglePwd('adminPwd', this)"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn-custom admin-btn">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="split-right admin-bg">
+            <div class="right-content">
+                <i class="fas fa-shield-alt"></i>
+                <h2>Admin Login</h2>
+                <p>Manage students, exams, and generate hall tickets from your admin dashboard</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 20px; position: relative; z-index: 1;">
+        <strong>Copyright &copy; 2026 <a href="/about">HallMeet</a>.</strong> All rights reserved.
+    </footer>
+
+    <!-- jQuery + Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ── State Transitions ──
+        function showSection(section) {
+            document.getElementById('homeContent').classList.add('hidden');
+            document.getElementById('optionsPill').classList.add('hidden');
+            document.getElementById('backBtn').classList.add('visible');
+            document.getElementById('brandPill').style.pointerEvents = 'auto';
+
+            document.querySelectorAll('.split-view').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            document.getElementById('section-' + section).classList.add('active');
+            
+            // Update URL for better sharing/bookmarking
+            const url = new URL(window.location);
+            url.searchParams.set('section', section);
+            window.history.replaceState({}, '', url);
+        }
+
+        function goBack() {
+            // Remove parameters from URL without refreshing
+            const url = new URL(window.location);
+            url.searchParams.delete('section');
+            url.searchParams.delete('error');
+            url.searchParams.delete('loginError');
+            window.history.replaceState({}, '', url);
+
+            document.getElementById('homeContent').classList.remove('hidden');
+            document.getElementById('optionsPill').classList.remove('hidden');
+            document.getElementById('backBtn').classList.remove('visible');
+            document.getElementById('brandPill').style.pointerEvents = 'none';
+
+            document.querySelectorAll('.split-view').forEach(function(el) {
+                el.classList.remove('active');
+            });
+        }
+
+        // ── Handle Auto-section from URL ──
+        window.addEventListener('load', function() {
+            const params = new URLSearchParams(window.location.search);
+            const section = params.get('section');
+            if (section && ['register', 'student', 'admin'].includes(section)) {
+                showSection(section);
+            }
+        });
+
+        // ── Toggle Password ──
+        function togglePwd(inputId, icon) {
+            var input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // ── Cursor-following Background ──
+        (function() {
+            var bg = document.getElementById('cursorBg');
+            if (!bg) return;
+            var colors = [
+                { r: 255, g: 224, b: 230 }, { r: 224, g: 247, b: 250 },
+                { r: 232, g: 245, b: 233 }, { r: 237, g: 231, b: 246 },
+                { r: 255, g: 249, b: 196 }, { r: 227, g: 242, b: 253 },
+                { r: 255, g: 243, b: 224 }, { r: 241, g: 248, b: 233 }
+            ];
+            var idx = 0, lastSwitch = 0;
+            document.addEventListener('mousemove', function(e) {
+                var now = Date.now();
+                if (now - lastSwitch > 2000) { idx = (idx + 1) % colors.length; lastSwitch = now; }
+                var c = colors[idx], c2 = colors[(idx + 3) % colors.length];
+                bg.style.background =
+                    'radial-gradient(600px circle at ' + e.clientX + 'px ' + e.clientY + 'px, ' +
+                    'rgba(' + c.r + ',' + c.g + ',' + c.b + ', 0.6), ' +
+                    'rgba(' + c2.r + ',' + c2.g + ',' + c2.b + ', 0.2) 50%, ' +
+                    'rgba(248, 249, 250, 0.05) 100%)';
+            });
+        })();
+    </script>
+</body>
+</html>

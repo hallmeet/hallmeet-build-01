@@ -1,0 +1,20 @@
+package com.example.HAllTicket.repository;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import org.springframework.stereotype.Repository;
+
+import com.example.HAllTicket.model.StudentModel;
+
+
+@Repository
+public interface StudentRepository extends JpaRepository<StudentModel, Integer> {
+    StudentModel findTop1ByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+	StudentModel findByfullName(String email);
+
+}

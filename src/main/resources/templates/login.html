@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{guest-base::layout(~{::section})}">
+<head>
+    <meta charset="utf-8">
+    <title>Student Login - HallMeet</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+            <div class="col-md-5 col-lg-4">
+                <div class="login-box" style="width: 100%; max-width: 450px; margin: 0 auto;">
+                    <div class="login-logo mb-4 text-center" style="font-size: 2rem; font-weight: 300;">
+                        <a href="/"><b>Hall Ticket</b> System</a>
+                    </div>
+                    <!-- /.login-logo -->
+                    <div class="card shadow">
+                        <div class="card-body login-card-body p-4">
+                            <p class="login-box-msg mb-4 text-center">Sign in to your student account</p>
+
+                            <!-- Error message display -->
+                            <div th:if="${loginError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <span th:text="${loginError}"></span>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+
+                    <form th:action="@{/signin}" method="get">
+                        <div class="input-group mb-3">
+                            <input type="email" name="username" class="form-control" placeholder="Email" required>
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-envelope"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="password" id="loginPassword" name="password" class="form-control" placeholder="Password" required>
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-eye toggle-password" id="loginTogglePassword" style="cursor: pointer;"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                            <p class="mb-1 mt-4 text-center">
+                                <a href="/registration">Register a new account</a>
+                            </p>
+                            <p class="mb-0 text-center">
+                                <a href="/AdminLoginPage">Admin Login</a>
+                            </p>
+                        </div>
+                        <!-- /.login-card-body -->
+                    </div>
+                </div>
+                <!-- /.login-box -->
+            </div>
+        </div>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('loginTogglePassword');
+            const passwordInput = document.getElementById('loginPassword');
+
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    
+                    // Toggle between eye and eye-slash
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

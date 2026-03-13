@@ -1,0 +1,327 @@
+package com.example.HAllTicket.service;
+
+import com.example.HAllTicket.dto.SubjectDTO;
+import com.example.HAllTicket.model.ExamModel;
+import com.example.HAllTicket.model.HallTicketModel;
+import com.example.HAllTicket.model.StudentModel;
+import com.lowagie.text.*;
+import com.lowagie.text.Font;
+import com.lowagie.text.Image;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.*;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PdfGeneratorService {
+
+    // --- Design System ---
+    private static final Color COLOR_PRIMARY = new Color(79, 70, 229); // Indigo 600
+    private static final Color COLOR_HEADER_BG = new Color(30, 41, 59); // Slate 800
+    private static final Color COLOR_SUCCESS = new Color(34, 197, 94);  // Green 500
+    private static final Color COLOR_TEXT_LIGHT = new Color(248, 250, 252); // Slate 50
+    private static final Color COLOR_TEXT_MUTED = new Color(100, 116, 139); // Slate 500
+    private static final Color COLOR_BORDER = new Color(226, 232, 240); // Slate 200
+
+    private static final Font FONT_TITLE = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Font.NORMAL, Color.WHITE);
+    private static final Font FONT_SUBTITLE = FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL, COLOR_TEXT_LIGHT);
+    private static final Font FONT_LABEL = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, Font.NORMAL, COLOR_TEXT_MUTED);
+    private static final Font FONT_VALUE = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Font.NORMAL, COLOR_HEADER_BG);
+    private static final Font FONT_TABLE_HEAD = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, Font.NORMAL, Color.WHITE);
+    private static final Font FONT_TABLE_BODY = FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL, COLOR_HEADER_BG);
+    private static final Font FONT_BADGE = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 7, Font.NORMAL, Color.WHITE);
+
+    public byte[] generateHallTicketPdf(HallTicketModel hall, ExamModel exam, StudentModel stud) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Document document = new Document(PageSize.A4, 30, 30, 30, 30);
+            PdfWriter.getInstance(document, baos);
+            document.open();
+
+            // --- 1. Header Block (Card Style) ---
+            PdfPTable headerTable = new PdfPTable(2);
+            headerTable.setWidthPercentage(100);
+            headerTable.setWidths(new float[]{3f, 1f});
+
+            PdfPCell headerCell = new PdfPCell();
+            headerCell.setBackgroundColor(COLOR_HEADER_BG);
+            headerCell.setPadding(20);
+            headerCell.setBorder(Rectangle.NO_BORDER);
+
+            Paragraph title = new Paragraph("E-HALL TICKET", FONT_TITLE);
+            headerCell.addElement(title);
+            headerCell.addElement(new Paragraph(hall.getExamName(), FONT_SUBTITLE));
+            headerTable.addCell(headerCell);
+
+            // Approved Badge in Header
+            PdfPCell badgeCell = new PdfPCell();
+            badgeCell.setBackgroundColor(COLOR_HEADER_BG);
+            badgeCell.setBorder(Rectangle.NO_BORDER);
+            badgeCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            badgeCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            badgeCell.setPaddingRight(20);
+
+            PdfPTable badge = new PdfPTable(1);
+            badge.setWidthPercentage(80);
+            PdfPCell bContent = new PdfPCell(new Phrase("APPROVED", FONT_BADGE));
+            bContent.setBackgroundColor(COLOR_SUCCESS);
+            bContent.setHorizontalAlignment(Element.ALIGN_CENTER);
+            bContent.setPadding(4);
+            bContent.setBorder(Rectangle.NO_BORDER);
+            badge.addCell(bContent);
+            badgeCell.addElement(badge);
+            headerTable.addCell(badgeCell);
+
+            document.add(headerTable);
+            document.add(new Paragraph(" "));
+
+            // --- 2. Student Info & Photo ---
+            PdfPTable mainInfo = new PdfPTable(2);
+            mainInfo.setWidthPercentage(100);
+            mainInfo.setWidths(new float[]{0.8f, 3.2f}); // Photo, Details
+            mainInfo.setSpacingBefore(10);
+
+            // Photo
+            PdfPCell photoCell = new PdfPCell();
+            photoCell.setBorder(Rectangle.NO_BORDER);
+            photoCell.setPaddingRight(15);
+            
+            boolean photoAdded = false;
+            if (stud != null && stud.getImageName() != null && !stud.getImageName().isEmpty()) {
+                try {
+                    File imgFile = new ClassPathResource("static/img/" + stud.getImageName()).getFile();
+                    if (imgFile.exists()) {
+                        Image img = Image.getInstance(imgFile.getAbsolutePath());
+                        img.scaleToFit(100, 120);
+                        photoCell.addElement(img);
+                        photoAdded = true;
+                    }
+                } catch (Exception ignored) {}
+            }
+            if (!photoAdded) {
+                // Placeholder box
+                PdfPTable ph = new PdfPTable(1);
+                ph.setWidthPercentage(100);
+                PdfPCell phCell = new PdfPCell(new Phrase("PHOTO", FONT_LABEL));
+                phCell.setFixedHeight(100);
+                phCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                phCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                phCell.setBackgroundColor(COLOR_BORDER);
+                phCell.setBorderColor(COLOR_PRIMARY);
+                ph.addCell(phCell);
+                photoCell.addElement(ph);
+            }
+            mainInfo.addCell(photoCell);
+
+            // Info Grid
+            PdfPTable infoGrid = new PdfPTable(2);
+            infoGrid.setWidthPercentage(100);
+            infoGrid.setSpacingBefore(0);
+
+            addStyledInfoCell(infoGrid, "CANDIDATE NAME", hall.getStudentName());
+            addStyledInfoCell(infoGrid, "SEAT NUMBER", hall.getSeatNo());
+            addStyledInfoCell(infoGrid, "INSTITUTION", hall.getInstituteName());
+            addStyledInfoCell(infoGrid, "HALL TICKET NO", String.valueOf(hall.getId()));
+
+            PdfPCell gridContainer = new PdfPCell(infoGrid);
+            gridContainer.setBorder(Rectangle.NO_BORDER);
+            mainInfo.addCell(gridContainer);
+            
+            document.add(mainInfo);
+            document.add(new Paragraph(" "));
+
+            // --- 3. Examination Schedule ---
+            Paragraph schedHead = new Paragraph("EXAMINATION SCHEDULE", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Font.NORMAL, COLOR_HEADER_BG));
+            schedHead.setSpacingBefore(20);
+            schedHead.setSpacingAfter(10);
+            document.add(schedHead);
+
+            PdfPTable subTable = new PdfPTable(4);
+            subTable.setWidthPercentage(100);
+            subTable.setWidths(new float[]{1f, 4f, 2f, 2f});
+            
+            addStyedTableHeader(subTable, "SR.");
+            addStyedTableHeader(subTable, "SUBJECT");
+            addStyedTableHeader(subTable, "DATE");
+            addStyedTableHeader(subTable, "TIME");
+
+            List<SubjectDTO> subjects = getSubjectsForPdf(hall, exam);
+            if (subjects.isEmpty()) {
+                PdfPCell empty = new PdfPCell(new Phrase("No subjects scheduled.", FONT_TABLE_BODY));
+                empty.setColspan(4);
+                empty.setPadding(10);
+                empty.setHorizontalAlignment(Element.ALIGN_CENTER);
+                subTable.addCell(empty);
+            } else {
+                int idx = 1;
+                for (SubjectDTO s : subjects) {
+                    addStyledTableBodyCell(subTable, String.valueOf(idx++));
+                    addStyledTableBodyCell(subTable, s.getName());
+                    addStyledTableBodyCell(subTable, s.getDate() != null && !s.getDate().isEmpty() ? s.getDate() : "-");
+                    addStyledTableBodyCell(subTable, s.getTime() != null && !s.getTime().isEmpty() ? s.getTime() : "-");
+                }
+            }
+            document.add(subTable);
+
+            // --- 4. Footer: QR & Signature ---
+            document.add(new Paragraph(" "));
+            PdfPTable footer = new PdfPTable(2);
+            footer.setWidthPercentage(100);
+            footer.setSpacingBefore(30);
+
+            // QR Code
+            PdfPCell qrCell = new PdfPCell();
+            qrCell.setBorder(Rectangle.NO_BORDER);
+            if (hall.getQrName() != null) {
+                try {
+                    File qrFile = new ClassPathResource("static/qr/" + hall.getQrName()).getFile();
+                    if (qrFile.exists()) {
+                        Image qr = Image.getInstance(qrFile.getAbsolutePath());
+                        qr.scaleToFit(80, 80);
+                        qrCell.addElement(qr);
+                        qrCell.addElement(new Paragraph("SCAN TO VERIFY", FONT_LABEL));
+                    }
+                } catch (Exception ignored) {}
+            }
+            footer.addCell(qrCell);
+
+            // Signature
+            PdfPCell sigCell = new PdfPCell();
+            sigCell.setBorder(Rectangle.NO_BORDER);
+            sigCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            sigCell.setVerticalAlignment(Element.ALIGN_BOTTOM);
+            Paragraph sig = new Paragraph("__________________________\nCONTROLLER OF EXAMINATIONS", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Font.NORMAL, COLOR_HEADER_BG));
+            sig.setAlignment(Element.ALIGN_RIGHT);
+            sigCell.addElement(sig);
+            footer.addCell(sigCell);
+
+            document.add(footer);
+
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void addStyledInfoCell(PdfPTable table, String label, String value) {
+        PdfPCell cell = new PdfPCell();
+        cell.setPadding(8);
+        cell.setBorder(Rectangle.NO_BORDER);
+        
+        PdfPTable inner = new PdfPTable(1);
+        PdfPCell innerCell = new PdfPCell();
+        innerCell.setPadding(6);
+        innerCell.setPaddingLeft(10);
+        innerCell.setBorderColorLeft(COLOR_PRIMARY);
+        innerCell.setBorderWidthLeft(3f);
+        innerCell.setBorderWidthBottom(0.5f);
+        innerCell.setBorderColorBottom(COLOR_BORDER);
+        innerCell.setBorderWidthTop(0);
+        innerCell.setBorderWidthRight(0);
+        innerCell.setBackgroundColor(new Color(248, 250, 252));
+
+        innerCell.addElement(new Paragraph(label, FONT_LABEL));
+        innerCell.addElement(new Paragraph(value != null && !value.isEmpty() ? value : "-", FONT_VALUE));
+        
+        inner.addCell(innerCell);
+        cell.addElement(inner);
+        table.addCell(cell);
+    }
+
+    private void addStyedTableHeader(PdfPTable table, String text) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, FONT_TABLE_HEAD));
+        cell.setBackgroundColor(COLOR_PRIMARY);
+        cell.setPadding(8);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setBorderColor(Color.WHITE);
+        table.addCell(cell);
+    }
+
+    private void addStyledTableBodyCell(PdfPTable table, String text) {
+        PdfPCell cell = new PdfPCell(new Phrase(text != null && !text.isEmpty() ? text : "-", FONT_TABLE_BODY));
+        cell.setPadding(6);
+        cell.setBorderColor(COLOR_BORDER);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        table.addCell(cell);
+    }
+
+    private List<SubjectDTO> getSubjectsForPdf(HallTicketModel hall, ExamModel exam) {
+        List<SubjectDTO> list = new ArrayList<>();
+        if (hall != null && hall.getSubjects() != null && !hall.getSubjects().isEmpty()) {
+            return hall.getSubjects();
+        }
+        if (exam != null && exam.getSubjects() != null && !exam.getSubjects().isEmpty()) {
+            return exam.getSubjects();
+        }
+        for (int i = 1; i <= 6; i++) {
+            String sub = getHallSub(hall, i);
+            String date = (exam != null) ? getExamDate(exam, i) : "-";
+            String time = (exam != null) ? getExamTime(exam, i) : "-";
+            if (sub == null || sub.isEmpty()) {
+                sub = (exam != null) ? getExamSub(exam, i) : null;
+            }
+            if (sub != null && !sub.isEmpty()) {
+                list.add(new SubjectDTO(sub, date, time));
+            }
+        }
+        return list;
+    }
+
+    private String getExamSub(ExamModel exam, int i) {
+        if (exam == null) return null;
+        return switch (i) {
+            case 1 -> exam.getSub1();
+            case 2 -> exam.getSub2();
+            case 3 -> exam.getSub3();
+            case 4 -> exam.getSub4();
+            case 5 -> exam.getSub5();
+            case 6 -> exam.getSub6();
+            default -> null;
+        };
+    }
+
+    private String getExamDate(ExamModel exam, int i) {
+        if (exam == null) return null;
+        return switch (i) {
+            case 1 -> exam.getDate1();
+            case 2 -> exam.getDate2();
+            case 3 -> exam.getDate3();
+            case 4 -> exam.getDate4();
+            case 5 -> exam.getDate5();
+            case 6 -> exam.getDate6();
+            default -> null;
+        };
+    }
+
+    private String getExamTime(ExamModel exam, int i) {
+        if (exam == null) return null;
+        return switch (i) {
+            case 1 -> exam.getTime1();
+            case 2 -> exam.getTime2();
+            case 3 -> exam.getTime3();
+            case 4 -> exam.getTime4();
+            case 5 -> exam.getTime5();
+            case 6 -> exam.getTime6();
+            default -> null;
+        };
+    }
+
+    private String getHallSub(HallTicketModel hall, int i) {
+        if (hall == null) return null;
+        return switch (i) {
+            case 1 -> hall.getSub1();
+            case 2 -> hall.getSub2();
+            case 3 -> hall.getSub3();
+            case 4 -> hall.getSub4();
+            case 5 -> hall.getSub5();
+            case 6 -> hall.getSub6();
+            default -> null;
+        };
+    }
+}

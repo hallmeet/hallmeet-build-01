@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-base::layout(~{::section})}">
+<head>
+    <meta charset="utf-8">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <!-- Statistics Cards (ids for auto-refresh) -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3 id="stat-totalStudents" th:text="${totalStudents ?: 0}">0</h3>
+                        <p>Total Students</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <a href="/StudentList_form" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3 id="stat-totalExams" th:text="${totalExams ?: 0}">0</h3>
+                        <p>Total Exams</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <a href="/exam-form" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3 id="stat-totalHallTickets" th:text="${totalHallTickets ?: 0}">0</h3>
+                        <p>Hall Tickets</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <a href="/hall-form" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3 id="stat-pendingHallTickets" th:text="${pendingHallTickets ?: 0}">0</h3>
+                        <p>Pending Requests</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <a href="/hall-form" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-bolt mr-2"></i>Quick Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="/StudentList_form" class="btn btn-block text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 20px; font-weight: 600; padding: 10px; box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);">
+                                    <i class="fas fa-users mr-2"></i>Manage Students
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="/collegeList-form" class="btn btn-block text-white" style="background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%); border: none; border-radius: 20px; font-weight: 600; padding: 10px; box-shadow: 0 4px 15px rgba(60, 186, 146, 0.3);">
+                                    <i class="fas fa-university mr-2"></i>Manage Colleges
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="/Subject-form" class="btn btn-block text-white" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); border: none; border-radius: 20px; font-weight: 600; padding: 10px; box-shadow: 0 4px 15px rgba(253, 160, 133, 0.3);">
+                                    <i class="fas fa-book mr-2"></i>Manage Syllabus
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="/exam-form" class="btn btn-block text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none; border-radius: 20px; font-weight: 600; padding: 10px; box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);">
+                                    <i class="fas fa-clipboard-list mr-2"></i>Manage Exams
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="/hall-form" class="btn btn-block text-white" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border: none; border-radius: 20px; font-weight: 600; padding: 10px; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);">
+                                    <i class="fas fa-ticket-alt mr-2"></i>Hall Tickets
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Exam Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-plus-circle mr-2"></i>Create New Exam</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" th:action="@{/Exam_form}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Course</label>
+                                        <select name="Course" class="form-control" required>
+                                            <option value="">Select Course</option>
+                                            <option value="MCA">MCA</option>
+                                            <option value="MBA">MBA</option>
+                                            <option value="BE">BE</option>
+                                            <option value="B.TECH">B.TECH</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Admission Year</label>
+                                        <select name="Year" class="form-control" required>
+                                            <option value="">Select Year</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Semester</label>
+                                        <select name="Semister" class="form-control" required>
+                                            <option value="">Select Semester</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus mr-2"></i>Create Exam
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Welcome Message -->
+        <div class="row" th:if="${user != null}">
+            <div class="col-12">
+                <div class="card bg-gradient-primary" style="box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); border: none; border-radius: 20px;">
+                    <div class="card-body">
+                        <h4 class="mb-0 text-white" style="font-weight: 600;">
+                            <i class="fas fa-user-circle mr-2"></i>
+                            Welcome, <span th:text="${user.fullName}">Admin</span>!
+                        </h4>
+                        <p class="mb-0 mt-2 text-white" style="opacity: 0.9;">Manage your HallMeet efficiently from this dashboard.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            (function() {
+                function refreshStats() {
+                    fetch('/api/dashboard/stats', { credentials: 'same-origin' })
+                        .then(function(res) {
+                            if (res.ok) return res.json();
+                            return null;
+                        })
+                        .then(function(data) {
+                            if (!data) return;
+                            var el;
+                            if (data.totalStudents !== undefined) {
+                                el = document.getElementById('stat-totalStudents');
+                                if (el) el.textContent = data.totalStudents;
+                            }
+                            if (data.totalExams !== undefined) {
+                                el = document.getElementById('stat-totalExams');
+                                if (el) el.textContent = data.totalExams;
+                            }
+                            if (data.totalHallTickets !== undefined) {
+                                el = document.getElementById('stat-totalHallTickets');
+                                if (el) el.textContent = data.totalHallTickets;
+                            }
+                            if (data.pendingHallTickets !== undefined) {
+                                el = document.getElementById('stat-pendingHallTickets');
+                                if (el) el.textContent = data.pendingHallTickets;
+                            }
+                        })
+                        .catch(function() {});
+                }
+                setInterval(refreshStats, 30000); // 30 seconds
+            })();
+            /*]]>*/
+        </script>
+    </section>
+</body>
+</html>

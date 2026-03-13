@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-base::layout(~{::section})}">
+
+<head>
+    <meta charset="utf-8">
+    <title>Exam Form</title>
+</head>
+
+<body>
+    <section th:fragment="content">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clipboard-list mr-2"></i>Exam Form
+                </h3>
+                <div class="card-tools">
+                    <a href="/exam-form" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left mr-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div th:if="${exam == null}" class="alert alert-danger">
+                    <strong><i class="fas fa-exclamation-circle mr-1"></i>Error:</strong> Exam data is missing. Please
+                    go back and try again.
+                    <br /><a href="javascript:history.back()" class="btn btn-primary mt-2">
+                        <i class="fas fa-arrow-left mr-1"></i>Go Back
+                    </a>
+                </div>
+
+                <div th:if="${exam != null}">
+                    <!-- Success Message -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong><i class="fas fa-check-circle mr-1"></i>Success:</strong> <span
+                            th:text="${success}"></span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong><i class="fas fa-exclamation-circle mr-1"></i>Error:</strong> <span
+                            th:text="${error}"></span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <form th:action="@{/save_ex}" th:object="${exam}" method="post" id="examForm">
+                        <input type="hidden" name="formToken" th:value="${formToken}">
+                        <input type="hidden" id="minExamDate" th:value="${minExamDate}">
+                        <input type="hidden" th:field="*{id}" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="examName">
+                                        <i class="fas fa-file-alt mr-1"></i>Exam Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="ExamName" class="form-control" id="examName"
+                                        placeholder="Enter exam name" th:value="${'Enter exam Name here'}" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="courseSelect">
+                                        <i class="fas fa-graduation-cap mr-1"></i>Course <span
+                                            class="text-danger">*</span>
+                                    </label>
+                                    <select name="Course" id="courseSelect" class="form-control" required
+                                        th:field="*{Course}">
+                                        <option value="">Select Course</option>
+                                        <option value="MCA">MCA</option>
+                                        <option value="MBA">MBA</option>
+                                        <option value="BE">BE</option>
+                                        <option value="B.TECH">B.TECH</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="yearSelect">
+                                        <i class="fas fa-calendar mr-1"></i>Year <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="Year" id="yearSelect" class="form-control" required
+                                        th:field="*{Year}">
+                                        <option value="">Select Year</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="semesterSelect">
+                                        <i class="fas fa-book mr-1"></i>Semester <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="Semister" id="semesterSelect" class="form-control" required
+                                        th:field="*{Semister}">
+                                        <option value="">Select Semester</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <div>
+                                        <span id="loadStatus" class="text-muted"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-list mr-2"></i>Subjects & Schedule</h5>
+                            <button type="button" class="btn btn-success btn-sm" id="addSubjectBtn">
+                                <i class="fas fa-plus mr-1"></i>Add Subject
+                            </button>
+                        </div>
+
+                        <!-- Subjects Container -->
+                        <div id="subjectsContainer">
+                            <!-- Subjects will be dynamically added here -->
+                        </div>
+
+                        <!-- Hidden field for JSON subjects -->
+                        <input type="hidden" name="subjectsJson" id="subjectsJson" />
+
+                        <!-- Hidden fields for existing subjects (legacy support during migration) -->
+                        <div id="existingSubjects" style="display: none;">
+                            <input type="hidden" th:field="*{Sub1}" id="hiddenSub1" />
+                            <input type="hidden" th:field="*{Sub2}" id="hiddenSub2" />
+                            <input type="hidden" th:field="*{Sub3}" id="hiddenSub3" />
+                            <input type="hidden" th:field="*{Sub4}" id="hiddenSub4" />
+                            <input type="hidden" th:field="*{Sub5}" id="hiddenSub5" />
+                            <input type="hidden" th:field="*{Sub6}" id="hiddenSub6" />
+                        </div>
+
+                        <!-- Existing JSON subjects data -->
+                        <script th:inline="javascript">
+                            var existingJsonSubjects = /*[[${exam.subjects}]]*/[];
+                        </script>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary" id="saveBtn">
+                                <i class="fas fa-save mr-1"></i>Save Exam
+                            </button>
+                            <a href="/exam-form" class="btn btn-secondary ml-2">
+                                <i class="fas fa-times mr-1"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="none">
+            (function () {
+                const MAX_SUBJECTS = 20;  // Maximum 20 subjects allowed
+                let subjectCount = 0;
+                const subjectsContainer = document.getElementById('subjectsContainer');
+                const addSubjectBtn = document.getElementById('addSubjectBtn');
+
+                // Add change listeners to dropdowns for auto-loading subjects
+                ['courseSelect', 'yearSelect', 'semesterSelect'].forEach(function (id) {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('change', tryLoadSubjects);
+                    }
+                });
+
+                // Try to load subjects when all dropdowns are selected
+                function tryLoadSubjects() {
+                    const course = document.getElementById('courseSelect').value;
+                    const year = document.getElementById('yearSelect').value;
+                    const semester = document.getElementById('semesterSelect').value;
+
+                    // Only load if all 3 are selected
+                    if (!course || !year || !semester) {
+                        return;
+                    }
+
+                    // Show loading state
+                    document.getElementById('loadStatus').innerHTML =
+                        '<i class="fas fa-spinner fa-spin"></i> Loading subjects from syllabus...';
+
+                    fetch('/api/syllabus/subjects?course=' + encodeURIComponent(course) +
+                        '&year=' + encodeURIComponent(year) +
+                        '&semester=' + encodeURIComponent(semester))
+                        .then(function (response) {
+                            return response.json();
+                        })
+                        .then(function (data) {
+                            if (!data.found) {
+                                document.getElementById('loadStatus').innerHTML =
+                                    '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> No syllabus found for this combination. Add subjects manually.</span>';
+                                return;
+                            }
+
+                            // Clear existing subjects
+                            subjectsContainer.innerHTML = '';
+                            subjectCount = 0;
+
+                            // Add subjects from syllabus (with empty date/time for admin to fill)
+                            data.subjects.forEach(function (subject) {
+                                addSubjectField(subject.name, '', '');
+                            });
+
+                            document.getElementById('loadStatus').innerHTML =
+                                '<span class="text-success"><i class="fas fa-check"></i> Loaded ' +
+                                data.subjects.length + ' subject(s) from syllabus. Set dates and times below.</span>';
+                        })
+                        .catch(function (error) {
+                            document.getElementById('loadStatus').innerHTML =
+                                '<span class="text-danger"><i class="fas fa-times"></i> Error loading subjects. Please try again.</span>';
+                            console.error('Error loading subjects:', error);
+                        });
+                }
+
+                // Load existing subjects if editing
+                function loadExistingSubjects() {
+                    // First try to load from JSON subjects (new format)
+                    if (typeof existingJsonSubjects !== 'undefined' && existingJsonSubjects && existingJsonSubjects.length > 0) {
+                        existingJsonSubjects.forEach(function (subject) {
+                            addSubjectField(subject.name || '', subject.date || '', subject.time || '');
+                        });
+                        return;
+                    }
+
+                    // Fallback to legacy Sub1-Sub6 fields
+                    const existingSubjects = [];
+                    for (let i = 1; i <= 6; i++) {
+                        const subField = document.getElementById('hiddenSub' + i);
+                        if (subField && subField.value && subField.value.trim() !== '') {
+                            existingSubjects.push({
+                                name: subField.value,
+                                date: '',
+                                time: ''
+                            });
+                        }
+                    }
+
+                    if (existingSubjects.length > 0) {
+                        existingSubjects.forEach(function (subject) {
+                            addSubjectField(subject.name, subject.date, subject.time);
+                        });
+                    } else {
+                        // Add one empty subject field by default
+                        addSubjectField();
+                    }
+                }
+
+                // Add a new subject field
+                function addSubjectField(subjectName, date, time) {
+                    subjectName = subjectName || '';
+                    date = date || '';
+                    time = time || '';
+
+                    if (subjectCount >= MAX_SUBJECTS) {
+                        alert('Maximum ' + MAX_SUBJECTS + ' subjects allowed');
+                        return;
+                    }
+
+                    subjectCount++;
+
+                    const subjectCard = document.createElement('div');
+                    subjectCard.className = 'card card-outline card-primary mb-3 subject-card';
+
+                    const cardHeader = document.createElement('div');
+                    cardHeader.className = 'card-header d-flex justify-content-between align-items-center py-2';
+                    cardHeader.innerHTML = '<h6 class="card-title mb-0">Subject ' + subjectCount + '</h6>' +
+                        '<button type="button" class="btn btn-danger btn-sm remove-subject-btn" ' + (subjectCount === 1 ? 'disabled' : '') + '>' +
+                        '<i class="fas fa-trash"></i> Remove</button>';
+
+                    const minDateEl = document.getElementById('minExamDate');
+                    const minDateVal = minDateEl ? minDateEl.value : '';
+
+                    const cardBody = document.createElement('div');
+                    cardBody.className = 'card-body py-2';
+                    cardBody.innerHTML = '<div class="row">' +
+                        '<div class="col-md-4"><div class="form-group mb-2">' +
+                        '<label>Subject Name <span class="text-danger">*</span></label>' +
+                        '<input type="text" class="form-control subject-name" placeholder="Enter subject name" value="' + escapeHtml(subjectName) + '" required />' +
+                        '</div></div>' +
+                        '<div class="col-md-4"><div class="form-group mb-2">' +
+                        '<label>Date</label>' +
+                        '<input type="date" class="form-control subject-date" value="' + escapeHtml(date) + '" min="' + minDateVal + '" />' +
+                        '</div></div>' +
+                        '<div class="col-md-4"><div class="form-group mb-2">' +
+                        '<label>Time</label>' +
+                        '<input type="text" class="form-control subject-time" placeholder="e.g., 10:00 AM" value="' + escapeHtml(time) + '" />' +
+                        '</div></div></div>';
+
+                    subjectCard.appendChild(cardHeader);
+                    subjectCard.appendChild(cardBody);
+                    subjectsContainer.appendChild(subjectCard);
+
+                    // Add remove button event listener
+                    const removeBtn = subjectCard.querySelector('.remove-subject-btn');
+                    removeBtn.addEventListener('click', function () {
+                        removeSubject(subjectCard);
+                    });
+
+                    updateSubjectNumbers();
+                }
+
+                // Escape HTML to prevent XSS
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+
+                // Remove a subject field
+                function removeSubject(subjectCard) {
+                    if (subjectCount <= 1) {
+                        alert('At least one subject is required');
+                        return;
+                    }
+
+                    subjectCard.remove();
+                    subjectCount--;
+                    updateSubjectNumbers();
+                }
+
+                // Update subject numbers
+                function updateSubjectNumbers() {
+                    const cards = subjectsContainer.querySelectorAll('.subject-card');
+                    cards.forEach(function (card, index) {
+                        const title = card.querySelector('.card-title');
+                        title.textContent = 'Subject ' + (index + 1);
+
+                        const removeBtn = card.querySelector('.remove-subject-btn');
+                        removeBtn.disabled = cards.length === 1;
+                    });
+                }
+
+                // Serialize subjects to JSON before form submission
+                function serializeSubjects() {
+                    const subjects = [];
+                    const cards = subjectsContainer.querySelectorAll('.subject-card');
+                    cards.forEach(function (card) {
+                        const name = card.querySelector('.subject-name').value.trim();
+                        const date = card.querySelector('.subject-date').value;
+                        const time = card.querySelector('.subject-time').value.trim();
+                        if (name) {  // Only include subjects with a name
+                            subjects.push({
+                                name: name,
+                                date: date,
+                                time: time
+                            });
+                        }
+                    });
+                    document.getElementById('subjectsJson').value = JSON.stringify(subjects);
+                }
+
+                // Add subject button event listener
+                addSubjectBtn.addEventListener('click', function () {
+                    addSubjectField();
+                });
+
+                // Form submission handler
+                document.getElementById('examForm').addEventListener('submit', function (e) {
+                    serializeSubjects();
+                });
+
+                // Load existing subjects on page load
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Check if we're editing (dropdowns already have values from Thymeleaf)
+                    const course = document.getElementById('courseSelect').value;
+                    const year = document.getElementById('yearSelect').value;
+                    const semester = document.getElementById('semesterSelect').value;
+
+                    // If editing and all values present, load existing subjects
+                    if (course && year && semester) {
+                        loadExistingSubjects();
+                    }
+                });
+            })();
+        </script>
+    </section>
+</body>
+
+</html>

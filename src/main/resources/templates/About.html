@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>About HallMeet - Project Summary</title>
+
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Modern Theme -->
+    <link rel="stylesheet" href="/css/modern-theme.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .about-card {
+            background: rgba(255, 255, 255, 0.84);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 35px;
+            padding: 30px 50px;
+            max-width: 1200px;
+            width: 95%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            margin: auto;
+        }
+
+        .about-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4, #3b82f6);
+        }
+
+        .about-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .about-header i {
+            font-size: 2.5rem;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            display: block;
+            filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+        }
+
+        .about-header h1 {
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: -1.5px;
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+        }
+
+        .summary-content {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #334155;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            text-align: justify;
+        }
+
+        .summary-content p {
+            margin-bottom: 0;
+        }
+
+        .back-btn-wrapper {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            z-index: 10;
+        }
+
+        .back-pill {
+            background: #1e293b;
+            color: #ffffff !important;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .back-pill:hover {
+            background: #334155;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-pill i {
+            transition: transform 0.3s ease;
+        }
+
+        .back-pill:hover i {
+            transform: translateX(-5px);
+        }
+
+        /* Decorative blobs */
+        .blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: -1;
+            border-radius: 50%;
+        }
+
+        .blob-1 { top: -100px; right: -100px; }
+        .blob-2 { bottom: -100px; left: -100px; }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="about-card shadow-lg">
+        <div class="back-btn-wrapper">
+            <a href="javascript:history.back()" class="back-pill">
+                <i class="fas fa-arrow-left"></i>
+                Go Back
+            </a>
+        </div>
+        
+        <div class="about-header text-center">
+            <i class="fas fa-ticket-alt"></i>
+            <h1>HallMeet</h1>
+            <p class="text-muted">Innovating Examination Identity Management</p>
+        </div>
+
+        <div class="summary-content">
+            <p>
+                <strong>HallMeet</strong> is a state-of-the-art Hall Ticket Generation and Management System designed to streamline the examination cycle for educational institutions. The platform serves as a centralized bridge between administrators and students, ensuring that the critical process of hall ticket issuance is secure, efficient, and completely digital.
+            </p>
+            <p>
+                The system features a robust multi-user architecture where <strong>Administrators</strong> can dynamically manage student registries, institutional data, and complex examination schedules. On the other end, <strong>Students</strong> benefit from a primary dashboard where they can apply for exams, monitor their application status in real-time, and download their digital identities instantly upon approval.
+            </p>
+            <p>
+                One of the core innovations of HallMeet is its <strong>verified verification system</strong>. Each approved hall ticket is automatically embedded with a unique, high-resolution QR code. This allows for instantaneous digital verification on the day of the exam, significantly reducing the chances of impersonation and administrative errors. Built with a focus on modern aesthetics and user experience, HallMeet removes traditional bottlenecks, making exam-readiness a seamless one-click experience.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-base::layout(~{::section})}">
+<head>
+    <meta charset="utf-8">
+    <title th:text="${student.id != null ? 'Edit Student' : 'Add Student'}">Student Form</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-user-edit mr-2"></i>
+                    <span th:text="${student.id != null ? 'Edit Student' : 'Add New Student'}">Student Form</span>
+                </h3>
+                <div class="card-tools">
+                    <a href="/StudentList_form" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left mr-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Success Message -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong><i class="fas fa-check-circle mr-1"></i>Success:</strong> <span th:text="${success}"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <!-- Error Message -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong><i class="fas fa-exclamation-circle mr-1"></i>Error:</strong> <span th:text="${error}"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <form action="#" th:action="@{/save}" th:object="${student}" method="post" id="studentForm" enctype="multipart/form-data" onsubmit="return validateDob();">
+                    <input type="hidden" name="formToken" th:value="${formToken}">
+                    <input type="hidden" th:field="*{id}" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="fullName">
+                                    <i class="fas fa-user mr-1"></i>Full Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" th:field="*{fullName}" class="form-control" id="fullName" placeholder="Enter full name" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email">
+                                    <i class="fas fa-envelope mr-1"></i>Email <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" th:field="*{email}" class="form-control" id="email" placeholder="Enter email address" required />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="mobileNo">
+                                    <i class="fas fa-phone mr-1"></i>Mobile Number <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" th:field="*{mobileNo}" class="form-control" id="mobileNo" placeholder="Enter mobile number" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dateOfBirth">
+                                    <i class="fas fa-calendar-alt mr-1"></i>Date of Birth <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" th:field="*{DateOfBirth}" class="form-control" id="dateOfBirth" required
+                                       th:max="${T(java.time.LocalDate).now().toString()}"
+                                       th:min="${T(java.time.LocalDate).now().minusYears(100).toString()}"
+                                       title="Must be at least 10 years ago; no future dates"/>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="collegeName">
+                                    <i class="fas fa-university mr-1"></i>Institute Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" th:field="*{instituteName}" class="form-control" id="collegeName" placeholder="Enter institute name" required />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="course">
+                                    <i class="fas fa-graduation-cap mr-1"></i>Course <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" th:field="*{Course}" class="form-control" id="course" placeholder="Enter course" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="admissionYear">
+                                    <i class="fas fa-calendar-check mr-1"></i>Admission Year <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" th:field="*{AdmissionForYear}" class="form-control" id="admissionYear" placeholder="Enter admission year" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="semister">
+                                    <i class="fas fa-book mr-1"></i>Semester <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" th:field="*{Semister}" class="form-control" id="semister" placeholder="Enter semester" required />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <i class="fas fa-save mr-1"></i>Save Student
+                        </button>
+                        <a href="/StudentList_form" class="btn btn-secondary ml-2">
+                            <i class="fas fa-times mr-1"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script th:inline="none">
+            function validateDob() {
+                var input = document.getElementById('dateOfBirth');
+                if (!input || !input.value) return true;
+                var dob = new Date(input.value);
+                var today = new Date();
+                if (dob > today) {
+                    alert('Date of birth cannot be in the future.');
+                    return false;
+                }
+                var age = (today - dob) / (365.25 * 24 * 60 * 60 * 1000);
+                if (age < 10) {
+                    alert('Student must be at least 10 years old.');
+                    return false;
+                }
+                return true;
+            }
+        </script>
+    </section>
+</body>
+</html>

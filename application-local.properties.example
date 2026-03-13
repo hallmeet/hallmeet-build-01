@@ -1,0 +1,12 @@
+# Local Database Configuration Template
+# Copy this file to application-local.properties and update with your MySQL credentials
+# This file should NOT be committed to version control (add to .gitignore)
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/hall_ticket
+spring.datasource.username=root
+spring.datasource.password=pathpair
+
+# Note: If using this file, Spring Boot will automatically load it
+# Make sure to update the password above with your actual MySQL password
+

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{guest-base::layout(~{::section})}">
+<head>
+    <meta charset="utf-8">
+    <title>Registration - HallMeet</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+            <div class="col-md-5 col-lg-4">
+                <div class="register-box" style="width: 100%; max-width: 450px; margin: 0 auto;">
+                    <div class="register-logo mb-4 text-center" style="font-size: 2rem; font-weight: 300;">
+                        <a href="/"><b>Hall Ticket</b> System</a>
+                    </div>
+
+                    <div class="card shadow">
+                        <div class="card-body register-card-body p-4">
+                            <p class="login-box-msg mb-4 text-center">Register a new account</p>
+
+                    <form method="post" th:action="@{/createUser}" enctype="multipart/form-data" id="registrationForm">
+                        <input type="hidden" name="formToken" th:value="${formToken}">
+                        <div class="input-group mb-3">
+                            <input type="text" name="fullName" class="form-control" placeholder="Full Name" required minlength="3" maxlength="100">
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-user"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="email" name="email" class="form-control" placeholder="Email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-envelope"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="password" id="regPassword" name="password" class="form-control" placeholder="Password" required minlength="8" maxlength="50">
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-eye toggle-password" id="regTogglePassword" style="cursor: pointer;"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="tel" name="mobileNo" class="form-control" placeholder="Mobile Number" required minlength="10" maxlength="10" pattern="[0-9]{10}">
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-phone"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                                    <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                    <span id="submitText">Register</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                            <p class="mb-1 mt-4 text-center">
+                                <a href="/signin_page">Already have an account? Sign in</a>
+                            </p>
+                            <p class="mb-0 text-center">
+                                <a href="/AdminLoginPage">Admin Login</a>
+                            </p>
+                        </div>
+                        <!-- /.form-box -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+        </div>
+        <!-- /.register-box -->
+
+        <script>
+            document.getElementById('registrationForm').addEventListener('submit', function(e) {
+                var submitBtn = document.getElementById('submitBtn');
+                var submitSpinner = document.getElementById('submitSpinner');
+                var submitText = document.getElementById('submitText');
+                
+                if (submitBtn && submitSpinner && submitText) {
+                    submitBtn.disabled = true;
+                    submitSpinner.classList.remove('d-none');
+                    submitText.textContent = 'Registering...';
+                }
+            });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const togglePassword = document.getElementById('regTogglePassword');
+                const passwordInput = document.getElementById('regPassword');
+
+                if (togglePassword && passwordInput) {
+                    togglePassword.addEventListener('click', function() {
+                        const isPassword = passwordInput.type === 'password';
+                        passwordInput.type = isPassword ? 'text' : 'password';
+                        
+                        // Toggle between eye and eye-slash
+                        this.classList.toggle('fa-eye');
+                        this.classList.toggle('fa-eye-slash');
+                    });
+                }
+            });
+        </script>
+    </section>
+</body>
+</html>

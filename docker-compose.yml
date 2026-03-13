@@ -1,0 +1,31 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: hall_ticket_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: hallticket123
+      MYSQL_DATABASE: hall_ticket
+      MYSQL_USER: halluser
+      MYSQL_PASSWORD: hallpass123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-phallticket123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hall_ticket_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  hall_ticket_network:
+    driver: bridge
+

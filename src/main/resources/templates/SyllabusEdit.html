@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-base::layout(~{::section})}">
+<head>
+    <meta charset="utf-8">
+    <title th:text="${syllabus.id != null ? 'Edit Syllabus' : 'Add Syllabus'}">Syllabus Form</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-book mr-2"></i>
+                    <span th:text="${syllabus.id != null ? 'Edit Syllabus' : 'Add New Syllabus'}">Syllabus Form</span>
+                </h3>
+                <div class="card-tools">
+                    <a href="/Subject-form" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left mr-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Success Message -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong><i class="fas fa-check-circle mr-1"></i>Success:</strong> <span th:text="${success}"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <!-- Error Message -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong><i class="fas fa-exclamation-circle mr-1"></i>Error:</strong> <span th:text="${error}"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <form action="#" th:action="@{/save_sy}" th:object="${syllabus}" method="post" id="syllabusForm">
+                    <input type="hidden" th:field="*{id}" />
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="course">
+                                    <i class="fas fa-graduation-cap mr-1"></i>Course Name <span class="text-danger">*</span>
+                                </label>
+                                <select name="Course" th:field="*{Course}" class="form-control" id="course" required>
+                                    <option value="">Select Course</option>
+                                    <option value="MCA">MCA</option>
+                                    <option value="MBA">MBA</option>
+                                    <option value="BE">BE</option>
+                                    <option value="B.TECH">B.TECH</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="year">
+                                    <i class="fas fa-calendar mr-1"></i>Year <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" th:field="*{Year}" class="form-control" id="year" placeholder="Year" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="semister">
+                                    <i class="fas fa-book mr-1"></i>Semester <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" th:field="*{Semister}" class="form-control" id="semister" placeholder="Semester" required />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"><i class="fas fa-list mr-2"></i>Subjects</h5>
+                        <button type="button" class="btn btn-success btn-sm" id="addSubjectBtn">
+                            <i class="fas fa-plus mr-1"></i>Add Subject
+                        </button>
+                    </div>
+
+                    <!-- Subjects Container -->
+                    <div id="subjectsContainer">
+                        <!-- Subjects will be dynamically added here -->
+                    </div>
+
+                    <!-- Hidden field for JSON subjects -->
+                    <input type="hidden" name="subjectsJson" id="subjectsJson" />
+
+                    <!-- Hidden fields for existing subjects (legacy support) -->
+                    <div id="existingSubjects" style="display: none;">
+                        <input type="hidden" th:field="*{Sub1}" id="hiddenSub1" />
+                        <input type="hidden" th:field="*{Sub2}" id="hiddenSub2" />
+                        <input type="hidden" th:field="*{Sub3}" id="hiddenSub3" />
+                        <input type="hidden" th:field="*{Sub4}" id="hiddenSub4" />
+                        <input type="hidden" th:field="*{Sub5}" id="hiddenSub5" />
+                        <input type="hidden" th:field="*{Sub6}" id="hiddenSub6" />
+                    </div>
+
+                    <!-- Existing JSON subjects data -->
+                    <script th:inline="javascript">
+                        var existingJsonSubjects = /*[[${syllabus.subjects}]]*/ [];
+                    </script>
+                    
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <span id="saveSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            <i class="fas fa-save mr-1"></i>
+                            <span id="saveText">Save</span>
+                        </button>
+                        <a href="/Subject-form" class="btn btn-secondary ml-2">
+                            <i class="fas fa-times mr-1"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <script th:inline="none">
+            (function() {
+                const MAX_SUBJECTS = 20;
+                let subjectCount = 0;
+                const subjectsContainer = document.getElementById('subjectsContainer');
+                const addSubjectBtn = document.getElementById('addSubjectBtn');
+
+                // Load existing subjects
+                function loadExistingSubjects() {
+                    // First try to load from JSON subjects (new format)
+                    if (typeof existingJsonSubjects !== 'undefined' && existingJsonSubjects && existingJsonSubjects.length > 0) {
+                        existingJsonSubjects.forEach(function(subject) {
+                            addSubjectField(subject.name || '');
+                        });
+                        return;
+                    }
+
+                    // Fallback to legacy Sub1-Sub6 fields
+                    const existingSubjects = [];
+                    for (let i = 1; i <= 6; i++) {
+                        const subField = document.getElementById('hiddenSub' + i);
+                        if (subField && subField.value && subField.value.trim() !== '') {
+                            existingSubjects.push(subField.value);
+                        }
+                    }
+
+                    if (existingSubjects.length > 0) {
+                        existingSubjects.forEach(function(name) {
+                            addSubjectField(name);
+                        });
+                    } else {
+                        addSubjectField();
+                    }
+                }
+
+                // Add a new subject field
+                function addSubjectField(subjectName) {
+                    subjectName = subjectName || '';
+
+                    if (subjectCount >= MAX_SUBJECTS) {
+                        alert('Maximum ' + MAX_SUBJECTS + ' subjects allowed');
+                        return;
+                    }
+
+                    subjectCount++;
+
+                    const row = document.createElement('div');
+                    row.className = 'row mb-2 subject-row';
+                    row.innerHTML = '<div class="col-md-10"><div class="form-group mb-0">' +
+                        '<div class="input-group">' +
+                        '<div class="input-group-prepend"><span class="input-group-text">' + subjectCount + '</span></div>' +
+                        '<input type="text" class="form-control subject-name" placeholder="Enter subject name" value="' + escapeHtml(subjectName) + '" required />' +
+                        '</div></div></div>' +
+                        '<div class="col-md-2"><button type="button" class="btn btn-danger btn-sm remove-subject-btn" ' + (subjectCount === 1 ? 'disabled' : '') + '>' +
+                        '<i class="fas fa-trash"></i></button></div>';
+
+                    subjectsContainer.appendChild(row);
+
+                    const removeBtn = row.querySelector('.remove-subject-btn');
+                    removeBtn.addEventListener('click', function() {
+                        if (subjectCount > 1) {
+                            row.remove();
+                            subjectCount--;
+                            updateSubjectNumbers();
+                        }
+                    });
+
+                    updateSubjectNumbers();
+                }
+
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+
+                function updateSubjectNumbers() {
+                    const rows = subjectsContainer.querySelectorAll('.subject-row');
+                    rows.forEach(function(row, index) {
+                        const badge = row.querySelector('.input-group-text');
+                        if (badge) badge.textContent = (index + 1);
+                        const removeBtn = row.querySelector('.remove-subject-btn');
+                        if (removeBtn) removeBtn.disabled = rows.length === 1;
+                    });
+                }
+
+                function serializeSubjects() {
+                    const subjects = [];
+                    const rows = subjectsContainer.querySelectorAll('.subject-row');
+                    rows.forEach(function(row) {
+                        const name = row.querySelector('.subject-name').value.trim();
+                        if (name) {
+                            subjects.push({ name: name, date: '', time: '' });
+                        }
+                    });
+                    document.getElementById('subjectsJson').value = JSON.stringify(subjects);
+                }
+
+                addSubjectBtn.addEventListener('click', function() {
+                    addSubjectField();
+                });
+
+                document.getElementById('syllabusForm').addEventListener('submit', function() {
+                    serializeSubjects();
+
+                    var saveBtn = document.getElementById('saveBtn');
+                    var saveSpinner = document.getElementById('saveSpinner');
+                    var saveText = document.getElementById('saveText');
+
+                    if (saveBtn && saveSpinner && saveText) {
+                        saveBtn.disabled = true;
+                        saveSpinner.classList.remove('d-none');
+                        saveText.textContent = 'Saving...';
+                    }
+                });
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    loadExistingSubjects();
+                });
+            })();
+        </script>
+    </section>
+</body>
+</html>
