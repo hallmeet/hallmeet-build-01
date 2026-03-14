@@ -8,5 +8,5 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-jammy
 COPY --from=build /target/*.jar app.jar
 EXPOSE 8080
-# Keep memory usage low for the free tier
-ENTRYPOINT ["java", "-Xmx300m", "-Xss512k", "-jar", "app.jar"]
+# Keep memory usage low for the free tier; use shell form so $PORT is expanded
+ENTRYPOINT java -Xmx300m -Xss512k -Dserver.port=${PORT:-8080} -jar app.jar

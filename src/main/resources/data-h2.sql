@@ -3,8 +3,8 @@
 -- Data will be inserted if the table is empty
 
 -- Insert admin user (from user's provided data)
-INSERT INTO admin_model (id, email, full_name, mobile_no, password, role) 
-SELECT 1, 'saurabh@gmail.com', 'saurabh borkar', '1234567890', '123456789', 'admin'
+INSERT INTO admin_model (id, email, full_name, mobile_no, password, role, deleted)
+SELECT 1, 'saurabh@gmail.com', 'saurabh borkar', '1234567890', '123456789', 'admin', false
 WHERE NOT EXISTS (SELECT 1 FROM admin_model WHERE email = 'saurabh@gmail.com');
 
 -- Add more admin users as needed
