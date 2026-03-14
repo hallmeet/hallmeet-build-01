@@ -2,7 +2,7 @@
 -- Runs once after schema creation when using MySQL. Idempotent: safe to run on every startup.
 
 -- Insert default admin user if not present
-INSERT INTO admin_model (email, full_name, mobile_no, password, role)
-SELECT 'saurabh@gmail.com', 'saurabh borkar', '1234567890', '123456789', 'admin'
+INSERT INTO admin_model (email, full_name, mobile_no, password, role, deleted)
+SELECT 'saurabh@gmail.com', 'saurabh borkar', '1234567890', '123456789', 'admin', false
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM admin_model WHERE email = 'saurabh@gmail.com');
