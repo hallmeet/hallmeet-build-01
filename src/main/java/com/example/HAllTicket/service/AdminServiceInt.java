@@ -47,4 +47,28 @@ public class AdminServiceInt implements AdminService{
 		return adminRepo.findTop1ByEmail(email);
 	}
 
+	@Override
+	public void save(AdminModel admin) {
+		adminRepo.save(admin);
+	}
+
+	@Override
+	public java.util.List<AdminModel> listAll() {
+		return adminRepo.findAll();
+	}
+
+	@Override
+	public AdminModel get(int id) {
+		return adminRepo.findById(id).orElse(null);
+	}
+
+	@Override
+	public void delete(int id) {
+		AdminModel admin = get(id);
+		if (admin != null) {
+			admin.setDeleted(true);
+			adminRepo.save(admin);
+		}
+	}
+
 }

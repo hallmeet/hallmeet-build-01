@@ -55,7 +55,7 @@ Login forms had no way to display error messages to users. Failed logins showed 
 **Fix Applied:**
 - Created `data-h2.sql` to automatically load your admin user
 - Configured H2 profile to initialize data on startup
-- Admin credentials now available: `saurabh@gmail.com` / `123456789`
+- Admin credentials now available: `swapnil@gmail.com` / `123456789`
 
 **Files Changed:**
 - `src/main/resources/data-h2.sql` (NEW)
@@ -106,7 +106,7 @@ Login forms had no way to display error messages to users. Failed logins showed 
 
 **Test Credentials:**
 ```
-Email: saurabh@gmail.com
+Email: swapnil@gmail.com
 Password: 123456789
 ```
 
@@ -118,7 +118,7 @@ Password: 123456789
 
 **Test Invalid Login:**
 ```
-Email: saurabh@gmail.com
+Email: swapnil@gmail.com
 Password: wrongpassword
 ```
 
@@ -192,7 +192,7 @@ If you want persistent data with MySQL:
    
    -- Insert your admin user
    INSERT INTO admin_model (email, full_name, mobile_no, password, role) 
-   VALUES ('saurabh@gmail.com', 'saurabh borkar', '1234567890', '123456789', 'admin');
+   VALUES ('swapnil@gmail.com', 'swapnil', '1234567890', '123456789', 'admin');
    
    EXIT;
    ```
@@ -271,4 +271,4 @@ Your HallMeet is now **functional** with **fixed authentication**!
 
 **Application Status:** ✅ Running  
 **URL:** http://localhost:8080  
-**Admin Credentials:** `saurabh@gmail.com` / `123456789`
+**Admin Credentials:** `swapnil@gmail.com` / `123456789`

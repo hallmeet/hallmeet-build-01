@@ -19,46 +19,73 @@
                 </div>
             </div>
             <div class="card-body">
-                <table id="syllabusTable" class="table table-bordered table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Course</th>
-                            <th>Year</th>
-                            <th>Semester</th>
-                            <th>Subject 1</th>
-                            <th>Subject 2</th>
-                            <th>Subject 3</th>
-                            <th>Subject 4</th>
-                            <th>Subject 5</th>
-                            <th>Subject 6</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="syllabus, stat : ${listSyllabus}">
-                            <td th:text="${stat.count}"></td>
-                            <td th:text="${syllabus.Course}"></td>
-                            <td th:text="${syllabus.Year}"></td>
-                            <td th:text="${syllabus.Semister}"></td>
-                            <td th:text="${#lists.size(syllabus.subjects) >= 1 ? syllabus.subjects[0].name : (syllabus.Sub1 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(syllabus.subjects) >= 2 ? syllabus.subjects[1].name : (syllabus.Sub2 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(syllabus.subjects) >= 3 ? syllabus.subjects[2].name : (syllabus.Sub3 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(syllabus.subjects) >= 4 ? syllabus.subjects[3].name : (syllabus.Sub4 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(syllabus.subjects) >= 5 ? syllabus.subjects[4].name : (syllabus.Sub5 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(syllabus.subjects) >= 6 ? syllabus.subjects[5].name : (syllabus.Sub6 ?: 'N/A')}"></td>
-                            <td>
-                                <a class="btn btn-sm btn-primary" th:href="@{'/edit2/' + ${syllabus.id}}" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a class="btn btn-sm btn-danger" th:href="@{'/delete2/' + ${syllabus.id}}" 
-                                   onclick="return confirm('Are you sure you want to delete this syllabus?');" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <style>
+                    #syllabusTable thead th {
+                        vertical-align: middle;
+                        text-align: center;
+                        background-color: #f0f4ff;
+                        color: #4f46e5;
+                        font-weight: 600;
+                        white-space: nowrap;
+                        border-bottom: 2px solid #e2e8f0;
+                    }
+                    #syllabusTable tbody td {
+                        vertical-align: middle;
+                        text-align: center;
+                    }
+                    #syllabusTable tbody td:nth-child(2) {
+                        text-align: left;
+                    }
+                    .subject-cell {
+                        font-size: 0.85rem;
+                        max-width: 150px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                </style>
+                <div class="table-wrap">
+                    <table id="syllabusTable" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Course</th>
+                                <th>Year</th>
+                                <th>Semester</th>
+                                <th>Subject 1</th>
+                                <th>Subject 2</th>
+                                <th>Subject 3</th>
+                                <th>Subject 4</th>
+                                <th>Subject 5</th>
+                                <th>Subject 6</th>
+                                <th style="min-width: 100px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="syllabus, stat : ${listSyllabus}">
+                                <td th:text="${stat.count}"></td>
+                                <td th:text="${syllabus.Course}"></td>
+                                <td th:text="${syllabus.Year}"></td>
+                                <td th:text="${syllabus.Semister}"></td>
+                                <td th:text="${#lists.size(syllabus.subjects) >= 1 ? syllabus.subjects[0].name : (syllabus.Sub1 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(syllabus.subjects) >= 2 ? syllabus.subjects[1].name : (syllabus.Sub2 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(syllabus.subjects) >= 3 ? syllabus.subjects[2].name : (syllabus.Sub3 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(syllabus.subjects) >= 4 ? syllabus.subjects[3].name : (syllabus.Sub4 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(syllabus.subjects) >= 5 ? syllabus.subjects[4].name : (syllabus.Sub5 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(syllabus.subjects) >= 6 ? syllabus.subjects[5].name : (syllabus.Sub6 ?: 'N/A')}"></td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" th:href="@{'/edit2/' + ${syllabus.id}}" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a class="btn btn-sm btn-danger" th:href="@{'/delete2/' + ${syllabus.id}}" 
+                                       onclick="return confirm('Are you sure you want to delete this syllabus?');" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

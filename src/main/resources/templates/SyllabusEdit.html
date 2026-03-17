@@ -46,10 +46,10 @@
                                 </label>
                                 <select name="Course" th:field="*{Course}" class="form-control" id="course" required>
                                     <option value="">Select Course</option>
-                                    <option value="MCA">MCA</option>
-                                    <option value="MBA">MBA</option>
-                                    <option value="BE">BE</option>
-                                    <option value="B.TECH">B.TECH</option>
+                                    <option th:each="course : ${courseList}" 
+                                            th:value="${course.courseName}" 
+                                            th:text="${course.courseName}"></option>
+                                    <option th:if="${#lists.isEmpty(courseList)}" disabled value="">No courses available - Create one first</option>
                                 </select>
                             </div>
                         </div>
@@ -58,7 +58,13 @@
                                 <label for="year">
                                     <i class="fas fa-calendar mr-1"></i>Year <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" th:field="*{Year}" class="form-control" id="year" placeholder="Year" required />
+                                <select th:field="*{Year}" class="form-control" id="year" required>
+                                    <option value="">Select Year</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -66,7 +72,17 @@
                                 <label for="semister">
                                     <i class="fas fa-book mr-1"></i>Semester <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" th:field="*{Semister}" class="form-control" id="semister" placeholder="Semester" required />
+                                <select th:field="*{Semister}" class="form-control" id="semister" required>
+                                    <option value="">Select Semester</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                </select>
                             </div>
                         </div>
                     </div>

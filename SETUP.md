@@ -80,7 +80,7 @@ To store data in a **real database** (visible in DBeaver, persistent across rest
 
 5. **First-time admin**  
    - With MySQL, an initial admin user is seeded automatically (see `data.sql`).  
-   - Or insert manually: `INSERT INTO admin_model (email, full_name, mobile_no, password, role) VALUES ('saurabh@gmail.com', 'saurabh borkar', '1234567890', '123456789', 'admin');`
+   - Or insert manually: `INSERT INTO admin_model (email, full_name, mobile_no, password, role) VALUES ('swapnil@gmail.com', 'swapnil', '1234567890', '123456789', 'admin');`
 
 **Verify:** In DBeaver, connect to MySQL `localhost:3306`, database `hall_ticket`, user `halluser`. After using the app, you should see data in `admin_model`, `hall_model`, `student_model`, `hall_ticket_model`, etc.
 

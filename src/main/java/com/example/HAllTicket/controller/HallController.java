@@ -46,6 +46,7 @@ import com.example.HAllTicket.service.ExamService;
 import com.example.HAllTicket.service.HallTicketService;
 import com.example.HAllTicket.service.StudentService;
 import com.example.HAllTicket.service.PdfGeneratorService;
+import com.example.HAllTicket.service.CourseService;
 import com.example.HAllTicket.service.SyllabusService;
 import com.example.HAllTicket.service.UserCredentialService;
 import com.example.HAllTicket.util.FormTokenUtil;
@@ -63,7 +64,7 @@ import org.slf4j.LoggerFactory;
 @Controller
 public class HallController {
     private static final Logger logger = LoggerFactory.getLogger(HallController.class);
-    
+
     @Autowired
     private UserCredentialService userService;
     @Autowired
@@ -84,6 +85,13 @@ public class HallController {
     private HallTicketService hallTicketService;
     @Autowired
     private PdfGeneratorService pdfGeneratorService;
+    @Autowired
+    private CourseService courseService;
+
+    @ModelAttribute("courseList")
+    public List<com.example.HAllTicket.model.CourseModel> getCourseList() {
+        return courseService.listAll();
+    }
 
     @GetMapping("/")
     public String index(Model model, HttpSession session) {
@@ -96,10 +104,10 @@ public class HallController {
         model.addAttribute("pageTitle", "About HallMeet");
         return "About";
     }
-    
+
     @GetMapping("/UserHomePage")
-    public String UserHomePage(@RequestParam(value = "username", required = false) String username, 
-                                Model model, HttpSession session) {
+    public String UserHomePage(@RequestParam(value = "username", required = false) String username,
+            Model model, HttpSession session) {
         model.addAttribute("formToken", FormTokenUtil.generateToken(session));
         if (username != null && !username.isEmpty()) {
             session.setAttribute("username", username);
@@ -107,33 +115,35 @@ public class HallController {
             StudentModel user = studentService.getUserByEmail(username);
             if (user != null) {
                 model.addAttribute("user", user);
-                
+
                 // Get all hall tickets for this student (show all, not just approved)
                 List<HallTicketModel> hallTickets = hallTicketService.listAll();
                 List<HallTicketModel> studentHallTickets = hallTickets.stream()
-                    .filter(ht -> ht.getEmail() != null && ht.getEmail().equals(username))
-                    // Sort: Approved first, then by QR code presence, then by ID
-                    .sorted((ht1, ht2) -> {
-                        if (ht1.getStatus() != null && ht1.getStatus().equals("Approved") && 
-                            !(ht2.getStatus() != null && ht2.getStatus().equals("Approved"))) {
-                            return -1;
-                        }
-                        if (ht2.getStatus() != null && ht2.getStatus().equals("Approved") && 
-                            !(ht1.getStatus() != null && ht1.getStatus().equals("Approved"))) {
-                            return 1;
-                        }
-                        return Integer.compare(ht2.getId(), ht1.getId());
-                    })
-                    .collect(Collectors.toList());
+                        .filter(ht -> ht.getEmail() != null && ht.getEmail().equals(username))
+                        // Sort: Approved first, then by QR code presence, then by ID
+                        .sorted((ht1, ht2) -> {
+                            if (ht1.getStatus() != null && ht1.getStatus().equals("Approved") &&
+                                    !(ht2.getStatus() != null && ht2.getStatus().equals("Approved"))) {
+                                return -1;
+                            }
+                            if (ht2.getStatus() != null && ht2.getStatus().equals("Approved") &&
+                                    !(ht1.getStatus() != null && ht1.getStatus().equals("Approved"))) {
+                                return 1;
+                            }
+                            return Integer.compare(ht2.getId(), ht1.getId());
+                        })
+                        .collect(Collectors.toList());
                 model.addAttribute("hall", studentHallTickets);
-                List<HallTicketModel> approvedHall = studentHallTickets.stream().filter(ht -> "Approved".equals(ht.getStatus())).collect(Collectors.toList());
-                List<HallTicketModel> pendingHall = studentHallTickets.stream().filter(ht -> !"Approved".equals(ht.getStatus())).collect(Collectors.toList());
+                List<HallTicketModel> approvedHall = studentHallTickets.stream()
+                        .filter(ht -> "Approved".equals(ht.getStatus())).collect(Collectors.toList());
+                List<HallTicketModel> pendingHall = studentHallTickets.stream()
+                        .filter(ht -> !"Approved".equals(ht.getStatus())).collect(Collectors.toList());
                 model.addAttribute("approvedHall", approvedHall);
                 model.addAttribute("pendingHall", pendingHall);
                 Set<String> appliedExamNames = studentHallTickets.stream()
-                    .map(HallTicketModel::getExamName)
-                    .filter(n -> n != null && !n.isEmpty())
-                    .collect(Collectors.toSet());
+                        .map(HallTicketModel::getExamName)
+                        .filter(n -> n != null && !n.isEmpty())
+                        .collect(Collectors.toSet());
                 model.addAttribute("appliedExamNames", appliedExamNames);
                 List<ExamModel> listexam = examService.listAll();
                 model.addAttribute("listexam", listexam);
@@ -142,40 +152,42 @@ public class HallController {
         }
         return "UserHomePage";
     }
-    
+
     @GetMapping("/getHall")
     public String getHall(@RequestParam("username") String username, Model model, HttpSession session) {
         model.addAttribute("formToken", FormTokenUtil.generateToken(session));
         StudentModel user = studentService.getUserByEmail(username);
         if (user != null) {
             model.addAttribute("user", user);
-            
+
             // Get all hall tickets for this student (show all, not just approved)
             List<HallTicketModel> hallTickets = hallTicketService.listAll();
             List<HallTicketModel> studentHallTickets = hallTickets.stream()
-                .filter(ht -> ht.getEmail() != null && ht.getEmail().equals(username))
-                // Sort: Approved first, then by QR code presence, then by ID
-                .sorted((ht1, ht2) -> {
-                    if (ht1.getStatus() != null && ht1.getStatus().equals("Approved") && 
-                        !(ht2.getStatus() != null && ht2.getStatus().equals("Approved"))) {
-                        return -1;
-                    }
-                    if (ht2.getStatus() != null && ht2.getStatus().equals("Approved") && 
-                        !(ht1.getStatus() != null && ht1.getStatus().equals("Approved"))) {
-                        return 1;
-                    }
-                    return Integer.compare(ht2.getId(), ht1.getId());
-                })
-                .collect(Collectors.toList());
+                    .filter(ht -> ht.getEmail() != null && ht.getEmail().equals(username))
+                    // Sort: Approved first, then by QR code presence, then by ID
+                    .sorted((ht1, ht2) -> {
+                        if (ht1.getStatus() != null && ht1.getStatus().equals("Approved") &&
+                                !(ht2.getStatus() != null && ht2.getStatus().equals("Approved"))) {
+                            return -1;
+                        }
+                        if (ht2.getStatus() != null && ht2.getStatus().equals("Approved") &&
+                                !(ht1.getStatus() != null && ht1.getStatus().equals("Approved"))) {
+                            return 1;
+                        }
+                        return Integer.compare(ht2.getId(), ht1.getId());
+                    })
+                    .collect(Collectors.toList());
             model.addAttribute("hall", studentHallTickets);
-            List<HallTicketModel> approvedHall = studentHallTickets.stream().filter(ht -> "Approved".equals(ht.getStatus())).collect(Collectors.toList());
-            List<HallTicketModel> pendingHall = studentHallTickets.stream().filter(ht -> !"Approved".equals(ht.getStatus())).collect(Collectors.toList());
+            List<HallTicketModel> approvedHall = studentHallTickets.stream()
+                    .filter(ht -> "Approved".equals(ht.getStatus())).collect(Collectors.toList());
+            List<HallTicketModel> pendingHall = studentHallTickets.stream()
+                    .filter(ht -> !"Approved".equals(ht.getStatus())).collect(Collectors.toList());
             model.addAttribute("approvedHall", approvedHall);
             model.addAttribute("pendingHall", pendingHall);
             Set<String> appliedExamNames = studentHallTickets.stream()
-                .map(HallTicketModel::getExamName)
-                .filter(n -> n != null && !n.isEmpty())
-                .collect(Collectors.toSet());
+                    .map(HallTicketModel::getExamName)
+                    .filter(n -> n != null && !n.isEmpty())
+                    .collect(Collectors.toSet());
             model.addAttribute("appliedExamNames", appliedExamNames);
             List<ExamModel> listexam = examService.listAll();
             model.addAttribute("listexam", listexam);
@@ -183,24 +195,26 @@ public class HallController {
         }
         return "UserHomePage";
     }
+
     @GetMapping("/StudentList_form")
     public String viewHomePage(Model model) {
-    	List<StudentModel> liststudent = studentService.listAll();
+        List<StudentModel> liststudent = studentService.listAll();
         model.addAttribute("liststudent", liststudent);
         System.out.print("Get / ");
         return "StudentList";
     }
+
     @GetMapping("/new")
     public String add(Model model, HttpSession session) {
         model.addAttribute("student", new StudentModel());
         model.addAttribute("formToken", FormTokenUtil.generateToken(session));
         return "EditStudent";
     }
- 
+
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public String saveStudent(@ModelAttribute("student") StudentModel std,
-                             @RequestParam(value = "formToken", required = false) String formToken,
-                             HttpSession session, RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes) {
         if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
             redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
             return "redirect:/StudentList_form";
@@ -227,7 +241,7 @@ public class HallController {
         }
         return "redirect:/StudentList_form";
     }
- 
+
     @RequestMapping("/edit/{id}")
     public ModelAndView showEditStudentPage(@PathVariable(name = "id") int id, HttpSession session) {
         ModelAndView mav = new ModelAndView("EditStudent");
@@ -236,6 +250,7 @@ public class HallController {
         mav.addObject("formToken", FormTokenUtil.generateToken(session));
         return mav;
     }
+
     @RequestMapping("/delete/{id}")
     public String deletestudent(@PathVariable(name = "id") int id, RedirectAttributes redirectAttributes) {
         try {
@@ -248,24 +263,44 @@ public class HallController {
         }
         return "redirect:/StudentList_form";
     }
-    
 
-    
-    
+    @PostMapping("/change-student-password")
+    public String changeStudentPassword(@RequestParam("email") String email,
+            @RequestParam("newPassword") String newPassword,
+            RedirectAttributes redirectAttributes) {
+        try {
+            UserCredential user = userService.getUserByEmail(email);
+            if (user == null) {
+                redirectAttributes.addFlashAttribute("error", "Student account (UserCredential) not found for email: " + email);
+                return "redirect:/StudentList_form";
+            }
+            
+            // Set the new raw password; createUser service implementation will handle hashing
+            user.setPassword(newPassword);
+            userService.createUser(user);
+            
+            logger.info("Admin changed password for student: {}", email);
+            redirectAttributes.addFlashAttribute("success", "Password updated successfully for " + email);
+        } catch (Exception e) {
+            logger.error("Error changing student password: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to change password: " + e.getMessage());
+        }
+        return "redirect:/StudentList_form";
+    }
 
     @GetMapping("/AdminLoginPage")
     public String AdminLoginPage(HttpSession session) {
-        // Clear session on login page access
-        session.invalidate();
+        // Clear session on login page access - commented out for debugging
+        // session.invalidate();
         return "redirect:/?section=admin";
     }
-    
+
     @GetMapping("/Alogin")
     public String AloginGet(HttpSession session) {
         // Check if user is already logged in as admin
         Boolean loggedIn = (Boolean) session.getAttribute("loggedIn");
         String role = (String) session.getAttribute("role");
-        
+
         if (loggedIn != null && loggedIn && role != null && role.equalsIgnoreCase("admin")) {
             // Already logged in, redirect to dashboard
             return "redirect:/adminPage";
@@ -274,17 +309,17 @@ public class HallController {
             return "redirect:/?section=admin";
         }
     }
-    
+
     @GetMapping("/adminPage")
     public String adminPage(HttpSession session, Model model) {
         // Check if user is logged in as admin
         Boolean loggedIn = (Boolean) session.getAttribute("loggedIn");
         String role = (String) session.getAttribute("role");
-        
+
         if (loggedIn == null || !loggedIn || role == null || !role.equalsIgnoreCase("admin")) {
             return "redirect:/AdminLoginPage";
         }
-        
+
         String username = (String) session.getAttribute("username");
         if (username != null) {
             AdminModel user = adminService.getUserByEmail(username);
@@ -292,28 +327,32 @@ public class HallController {
                 model.addAttribute("user", user);
             }
         }
-        
+
         // Add statistics for dashboard with null safety
         try {
             List<StudentModel> students = studentService.listAll();
             List<ExamModel> exams = examService.listAll();
             List<HallTicketModel> hallTickets = hallTicketService.listAll();
-            
+
             long totalStudents = (students != null) ? students.size() : 0;
             long totalExams = (exams != null) ? exams.size() : 0;
             long totalHallTickets = (hallTickets != null) ? hallTickets.size() : 0;
             long pendingHallTickets = 0;
-            
+
             if (hallTickets != null) {
                 pendingHallTickets = hallTickets.stream()
-                    .filter(ht -> ht != null && ht.getStatus() != null && ht.getStatus().equals("Pending"))
-                    .count();
+                        .filter(ht -> ht != null && ht.getStatus() != null && ht.getStatus().equals("Pending"))
+                        .count();
             }
-            
+
             model.addAttribute("totalStudents", totalStudents);
             model.addAttribute("totalExams", totalExams);
             model.addAttribute("totalHallTickets", totalHallTickets);
             model.addAttribute("pendingHallTickets", pendingHallTickets);
+
+            // Add courses for the "Create Exam" section
+            List<com.example.HAllTicket.model.CourseModel> courseList = courseService.listAll();
+            model.addAttribute("courseList", courseList);
         } catch (Exception e) {
             logger.error("Error calculating statistics: {}", e.getMessage(), e);
             // Set default values if there's an error
@@ -322,17 +361,213 @@ public class HallController {
             model.addAttribute("totalHallTickets", 0);
             model.addAttribute("pendingHallTickets", 0);
         }
-        
+
         model.addAttribute("pageTitle", "Admin Dashboard");
         return "adminPage";
     }
-    
+
+    @GetMapping("/admin-profile")
+    public String adminProfile(HttpSession session, Model model) {
+        Boolean loggedIn = (Boolean) session.getAttribute("loggedIn");
+        String role = (String) session.getAttribute("role");
+
+        if (loggedIn == null || !loggedIn || role == null || !role.equalsIgnoreCase("admin")) {
+            return "redirect:/AdminLoginPage";
+        }
+
+        String username = (String) session.getAttribute("username");
+        if (username != null) {
+            AdminModel user = adminService.getUserByEmail(username);
+            if (user != null) {
+                model.addAttribute("user", user);
+            }
+        }
+        model.addAttribute("pageTitle", "Admin Profile");
+        model.addAttribute("formToken", FormTokenUtil.generateToken(session));
+        return "AdminProfile";
+    }
+
+    @PostMapping("/save-admin-profile")
+    public String saveAdminProfile(@ModelAttribute("user") AdminModel admin,
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
+            return "redirect:/admin-profile";
+        }
+
+        try {
+            // Find existing admin to preserve fields not in form (like password if not
+            // changed)
+            AdminModel existingAdmin = adminService.get3(admin.getEmail());
+            if (existingAdmin != null) {
+                existingAdmin.setFullName(admin.getFullName());
+                existingAdmin.setMobileNo(admin.getMobileNo());
+                // Handle password change if needed, for now just basic info
+                adminService.save(existingAdmin);
+                session.setAttribute("fullName", existingAdmin.getFullName());
+                redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
+            }
+        } catch (Exception e) {
+            logger.error("Error updating admin profile: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to update profile: " + e.getMessage());
+        }
+        return "redirect:/admin-profile";
+    }
+
+    @GetMapping("/manage-admins")
+    public String manageAdmins(HttpSession session, Model model) {
+        Boolean loggedIn = (Boolean) session.getAttribute("loggedIn");
+        String role = (String) session.getAttribute("role");
+
+        if (loggedIn == null || !loggedIn || role == null || !role.equalsIgnoreCase("admin")) {
+            return "redirect:/AdminLoginPage";
+        }
+
+        List<AdminModel> admins = adminService.listAll();
+        model.addAttribute("admins", admins);
+        model.addAttribute("newAdmin", new AdminModel());
+        model.addAttribute("pageTitle", "Manage Administrators");
+        model.addAttribute("formToken", FormTokenUtil.generateToken(session));
+        return "ManageAdmins";
+    }
+
+    @PostMapping("/save-new-admin")
+    public String saveNewAdmin(@ModelAttribute("newAdmin") AdminModel admin,
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
+            return "redirect:/manage-admins";
+        }
+
+        try {
+            if (adminService.checkEmail(admin.getEmail())) {
+                redirectAttributes.addFlashAttribute("error", "Email already exists!");
+                return "redirect:/manage-admins";
+            }
+            // Hash the password
+            admin.setPassword(PasswordUtil.encode(admin.getPassword()));
+            admin.setRole("admin");
+            adminService.save(admin);
+            redirectAttributes.addFlashAttribute("success", "New administrator created successfully!");
+        } catch (Exception e) {
+            logger.error("Error creating new admin: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to create administrator: " + e.getMessage());
+        }
+        return "redirect:/manage-admins";
+    }
+
+    @GetMapping("/delete-admin/{id}")
+    public String deleteAdmin(@PathVariable("id") int id, HttpSession session, RedirectAttributes redirectAttributes) {
+        Boolean loggedIn = (Boolean) session.getAttribute("loggedIn");
+        String role = (String) session.getAttribute("role");
+        String currentUsername = (String) session.getAttribute("username");
+
+        if (loggedIn == null || !loggedIn || role == null || !role.equalsIgnoreCase("admin")) {
+            return "redirect:/AdminLoginPage";
+        }
+
+        try {
+            AdminModel adminToDelete = adminService.get(id);
+            if (adminToDelete != null && adminToDelete.getEmail().equals(currentUsername)) {
+                redirectAttributes.addFlashAttribute("error", "You cannot delete your own account!");
+            } else {
+                adminService.delete(id);
+                redirectAttributes.addFlashAttribute("success", "Administrator deleted successfully!");
+            }
+        } catch (Exception e) {
+            logger.error("Error deleting admin: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to delete administrator.");
+        }
+        return "redirect:/manage-admins";
+    }
+
+    @GetMapping("/course-form")
+    public String manageCourses(HttpSession session, Model model) {
+        Boolean loggedIn = (Boolean) session.getAttribute("loggedIn");
+        String role = (String) session.getAttribute("role");
+        if (loggedIn == null || !loggedIn || role == null || !role.equalsIgnoreCase("admin")) {
+            return "redirect:/AdminLoginPage";
+        }
+
+        List<com.example.HAllTicket.model.CourseModel> courses = courseService.listAll();
+        model.addAttribute("courses", courses);
+        model.addAttribute("newCourse", new com.example.HAllTicket.model.CourseModel());
+        model.addAttribute("pageTitle", "Manage Courses");
+        model.addAttribute("formToken", FormTokenUtil.generateToken(session));
+        return "CourseList";
+    }
+
+    @PostMapping("/save-course")
+    public String saveCourse(@ModelAttribute("newCourse") com.example.HAllTicket.model.CourseModel course,
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
+            return "redirect:/course-form";
+        }
+        try {
+            courseService.save(course);
+            redirectAttributes.addFlashAttribute("success", "Course saved successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to save course: " + e.getMessage());
+        }
+        return "redirect:/course-form";
+    }
+
+    @GetMapping("/delete-course/{id}")
+    public String deleteCourse(@PathVariable("id") int id, RedirectAttributes redirectAttributes) {
+        try {
+            courseService.delete(id);
+            redirectAttributes.addFlashAttribute("success", "Course deleted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to delete course: " + e.getMessage());
+        }
+        return "redirect:/course-form";
+    }
+
+    @PostMapping("/change-admin-password")
+    public String changeAdminPassword(@RequestParam("currentPassword") String currentPassword,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword,
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
+            return "redirect:/admin-profile";
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("error", "New passwords do not match!");
+            return "redirect:/admin-profile";
+        }
+
+        String username = (String) session.getAttribute("username");
+        try {
+            AdminModel admin = adminService.getUserByEmail(username);
+            if (admin != null) {
+                if (PasswordUtil.matches(currentPassword, admin.getPassword())) {
+                    admin.setPassword(PasswordUtil.encode(newPassword));
+                    adminService.save(admin);
+                    redirectAttributes.addFlashAttribute("success", "Password changed successfully!");
+                } else {
+                    redirectAttributes.addFlashAttribute("error", "Incorrect current password!");
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error changing password: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to change password.");
+        }
+        return "redirect:/admin-profile";
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
     }
-    
+
     @GetMapping("/student-logout")
     public String studentLogout(HttpSession session) {
         session.invalidate();
@@ -341,46 +576,53 @@ public class HallController {
 
     @PostMapping("/Alogin")
     public String AdminLogin(@RequestParam("username") String username,
-                             @RequestParam("password") String password,
-                             HttpSession session, RedirectAttributes redirectAttributes) {
+            @RequestParam("password") String password,
+            HttpSession session, RedirectAttributes redirectAttributes) {
 
-        AdminModel user = adminService.getUserByEmail(username);
-        
+        username = (username != null) ? username.trim() : "";
+        password = (password != null) ? password.trim() : "";
+
+        String normalizedEmail = username.toLowerCase();
+        AdminModel user = adminService.getUserByEmail(normalizedEmail);
+
         if (user == null) {
-            logger.warn("Login attempt with non-existent email: {}", username);
+            logger.warn("Login attempt with non-existent email: {}", normalizedEmail);
             redirectAttributes.addFlashAttribute("loginError", "Invalid email or password");
             return "redirect:/?section=admin";
         }
-        
-        if (!PasswordUtil.matches(password, user.getPassword())) {
-            logger.warn("Login attempt with incorrect password for email: {}", username);
+
+        boolean passwordMatches = PasswordUtil.matches(password, user.getPassword());
+
+        if (!passwordMatches) {
+            logger.warn("Login attempt with incorrect password for email: {}", normalizedEmail);
             redirectAttributes.addFlashAttribute("loginError", "Invalid email or password");
             return "redirect:/?section=admin";
         }
-        
+
         // Authentication successful
         String role = user.getRole();
-        
+
         // Verify admin role
         if (role == null || !role.equalsIgnoreCase("admin")) {
-            logger.warn("Login attempt with invalid role: {} for email: {}", role, username);
+            logger.warn("Login attempt with invalid role: {} for email: {}", role, normalizedEmail);
             redirectAttributes.addFlashAttribute("loginError", "Invalid role. Admin access only.");
             return "redirect:/?section=admin";
         }
 
-        logger.info("Successful login for user: {} with role: {}", username, role);
-        
+        logger.info("Successful login for user: {} with role: {}", normalizedEmail, role);
+
         session.setAttribute("loggedIn", true);
         session.setAttribute("role", role);
-        session.setAttribute("username", username);
+        session.setAttribute("username", normalizedEmail);
         session.setAttribute("fullName", user.getFullName());
-        
+
         return "redirect:/adminPage";
     }
+
     @PostMapping("/UpdateDetails")
     public String UpdateDetails(@RequestParam("username") String username,
-                               @RequestParam(value = "formToken", required = false) String formToken,
-                               HttpSession session, RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes) {
         if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
             redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
             return "redirect:/UserHomePage?username=" + (username != null ? username : "");
@@ -393,106 +635,125 @@ public class HallController {
         redirectAttributes.addFlashAttribute("username", username);
         return "redirect:/ExistingUser?username=" + (username != null ? username : "");
     }
+
     @GetMapping("/ExistingUser")
-    public String existingUserPage(@RequestParam(value = "username", required = false) String usernameParam, Model model, HttpSession session) {
-        model.addAttribute("formToken", FormTokenUtil.generateToken(session));
-        String username = usernameParam != null && !usernameParam.isEmpty() ? usernameParam : (String) session.getAttribute("username");
-        if (username != null && !username.isEmpty()) {
-            StudentModel user = studentService.getUserByEmail(username);
-            if (user != null) {
-                model.addAttribute("user", user);
-            }
+    public String existingUserPage(@RequestParam(value = "username", required = false) String usernameParam,
+            Model model, HttpSession session) {
+        String username = (usernameParam != null && !usernameParam.isEmpty()) ? usernameParam
+                : (String) session.getAttribute("username");
+        if (username == null || username.isEmpty()) {
+            return "redirect:/signin_page";
         }
+
+        StudentModel user = studentService.getUserByEmail(username);
+        if (user == null) {
+            logger.warn("Student profile not found for username: {}", username);
+            return "redirect:/UserHomePage?username=" + username;
+        }
+
+        model.addAttribute("user", user);
+        model.addAttribute("courseList", courseService.listAll());
+        model.addAttribute("formToken", FormTokenUtil.generateToken(session));
+        model.addAttribute("pageTitle", "Edit Profile");
         return "ExistingUser";
     }
+
     @GetMapping("/signin_page")
     public String userloginpage() {
-    	return "redirect:/?section=student";
+        return "redirect:/?section=student";
     }
-    
-    
+
     @PostMapping("/signin")
     public String loginUser(@RequestParam("username") String username,
-                            @RequestParam("password") String password,
-                            HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+            @RequestParam("password") String password,
+            HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+
+        if (username == null) username = "";
+        // Normalize email to lowercase
+        final String normalizedUsername = username.toLowerCase();
 
         // Check credentials in UserCredential (student login credentials)
-        UserCredential hallUser = userService.getUserByEmail(username);
-        
+        UserCredential hallUser = userService.getUserByEmail(normalizedUsername);
+
         if (hallUser == null) {
             logger.warn("Student login attempt with non-existent email: {}", username);
             redirectAttributes.addFlashAttribute("loginError", "Invalid email or password");
             return "redirect:/?section=student";
         }
-        
+
         if (!PasswordUtil.matches(password, hallUser.getPassword())) {
             logger.warn("Student login attempt with incorrect password for email: {}", username);
             redirectAttributes.addFlashAttribute("loginError", "Invalid email or password");
             return "redirect:/?section=student";
         }
-        
+
         // Check if student profile exists
-        StudentModel user = studentService.getUserByEmail(username);
+        StudentModel user = studentService.getUserByEmail(normalizedUsername);
         if (user == null) {
             // User has credentials but no student profile - redirect to complete profile
-            logger.info("Student credentials valid but profile incomplete: {}", username);
+            logger.info("Student credentials valid but profile incomplete: {}", normalizedUsername);
             session.setAttribute("loggedIn", true);
-            session.setAttribute("username", username);
+            session.setAttribute("username", normalizedUsername);
             session.setAttribute("fullName", hallUser.getFullName());
             StudentModel newStudent = new StudentModel();
             newStudent.setEmail(hallUser.getEmail());
             newStudent.setFullName(hallUser.getFullName());
             newStudent.setMobileNo(hallUser.getMobileNo());
             model.addAttribute("user", newStudent);
+            model.addAttribute("courseList", courseService.listAll());
             return "userReDetailsPage";
         }
-        
+
         // Authentication successful with complete profile
         logger.info("Successful student login for: {}", username);
-        
+
         if (user != null) {
             model.addAttribute("user", user);
-            
-            // Get all hall tickets for this student (show all, but prioritize approved ones)
+
+            // Get all hall tickets for this student (show all, but prioritize approved
+            // ones)
             List<HallTicketModel> hallTickets = hallTicketService.listAll();
             List<HallTicketModel> studentHallTickets = hallTickets.stream()
-                .filter(ht -> ht.getEmail() != null && ht.getEmail().equals(username))
-                // Show all tickets, but prioritize those with QR codes (which means they're processed)
-                .sorted((ht1, ht2) -> {
-                    // Sort: Approved first, then by QR code presence, then by ID
-                    if (ht1.getStatus() != null && ht1.getStatus().equals("Approved") && 
-                        !(ht2.getStatus() != null && ht2.getStatus().equals("Approved"))) {
-                        return -1;
-                    }
-                    if (ht2.getStatus() != null && ht2.getStatus().equals("Approved") && 
-                        !(ht1.getStatus() != null && ht1.getStatus().equals("Approved"))) {
-                        return 1;
-                    }
-                    // If both have QR codes or both don't, sort by ID
-                    return Integer.compare(ht2.getId(), ht1.getId());
-                })
-                .collect(Collectors.toList());
+                    .filter(ht -> ht.getEmail() != null && ht.getEmail().equals(normalizedUsername))
+                    // Show all tickets, but prioritize those with QR codes (which means they're
+                    // processed)
+                    .sorted((ht1, ht2) -> {
+                        // Sort: Approved first, then by QR code presence, then by ID
+                        if (ht1.getStatus() != null && ht1.getStatus().equals("Approved") &&
+                                !(ht2.getStatus() != null && ht2.getStatus().equals("Approved"))) {
+                            return -1;
+                        }
+                        if (ht2.getStatus() != null && ht2.getStatus().equals("Approved") &&
+                                !(ht1.getStatus() != null && ht1.getStatus().equals("Approved"))) {
+                            return 1;
+                        }
+                        // If both have QR codes or both don't, sort by ID
+                        return Integer.compare(ht2.getId(), ht1.getId());
+                    })
+                    .collect(Collectors.toList());
             model.addAttribute("hall", studentHallTickets);
-            List<HallTicketModel> approvedHall = studentHallTickets.stream().filter(ht -> "Approved".equals(ht.getStatus())).collect(Collectors.toList());
-            List<HallTicketModel> pendingHall = studentHallTickets.stream().filter(ht -> !"Approved".equals(ht.getStatus())).collect(Collectors.toList());
+            List<HallTicketModel> approvedHall = studentHallTickets.stream()
+                    .filter(ht -> "Approved".equals(ht.getStatus())).collect(Collectors.toList());
+            List<HallTicketModel> pendingHall = studentHallTickets.stream()
+                    .filter(ht -> !"Approved".equals(ht.getStatus())).collect(Collectors.toList());
             model.addAttribute("approvedHall", approvedHall);
             model.addAttribute("pendingHall", pendingHall);
             Set<String> appliedExamNames = studentHallTickets.stream()
-                .map(HallTicketModel::getExamName)
-                .filter(n -> n != null && !n.isEmpty())
-                .collect(Collectors.toSet());
+                    .map(HallTicketModel::getExamName)
+                    .filter(n -> n != null && !n.isEmpty())
+                    .collect(Collectors.toSet());
             model.addAttribute("appliedExamNames", appliedExamNames);
             List<ExamModel> listexam = examService.listAll();
             model.addAttribute("listexam", listexam);
             model.addAttribute("exam", new ExamModel());
             model.addAttribute("pageTitle", "Student Dashboard");
             session.setAttribute("loggedIn", true);
-            session.setAttribute("username", username);
+            session.setAttribute("username", normalizedUsername);
             session.setAttribute("fullName", user.getFullName());
 
-            return "redirect:/UserHomePage?username=" + username;
+            return "redirect:/UserHomePage?username=" + normalizedUsername;
         }
-        
+
         // If we reach here, something went wrong (shouldn't happen with new logic)
         redirectAttributes.addFlashAttribute("loginError", "An unexpected error occurred");
         return "redirect:/?section=student";
@@ -521,24 +782,32 @@ public class HallController {
     }
 
     @PostMapping("/createUser")
-    public String createUser(@ModelAttribute UserCredential userCredential, @RequestParam(value = "formToken", required = false) String formToken,
-                            HttpSession session, RedirectAttributes redirectAttributes) {
+    public String createUser(@ModelAttribute UserCredential userCredential,
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes) {
         if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
             redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
             return "redirect:/?section=register";
         }
-        logger.info("Registration attempt for email: {}", userCredential.getEmail() != null ? userCredential.getEmail() : "(null)");
+        logger.info("Registration attempt for email: {}",
+                userCredential.getEmail() != null ? userCredential.getEmail() : "(null)");
         try {
             if (userCredential.getEmail() == null || userCredential.getEmail().isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Email is required");
                 return "redirect:/?section=register";
             }
-            
+
+            // Case-sensitive validation for email
+            if (!userCredential.getEmail().equals(userCredential.getEmail().toLowerCase())) {
+                redirectAttributes.addFlashAttribute("error", "Email address must be in lowercase only. Uppercase letters are not accepted.");
+                return "redirect:/?section=register";
+            }
+
             if (userCredential.getPassword() == null || userCredential.getPassword().length() < 8) {
                 redirectAttributes.addFlashAttribute("error", "Password must be at least 8 characters");
                 return "redirect:/?section=register";
             }
-            
+
             boolean emailExists = userService.checkEmail(userCredential.getEmail());
             if (emailExists) {
                 redirectAttributes.addFlashAttribute("error", "Email ID already exists. Please use a different email.");
@@ -568,76 +837,116 @@ public class HallController {
 
     @PostMapping("/update-student/{id}")
     public String updateStudent(@ModelAttribute("user") StudentModel user,
- 		   						@RequestParam("username") String username,
- 		   						@PathVariable("id") int id,
- 		   						@RequestParam(value = "formToken", required = false) String formToken,
- 		   						HttpSession session, RedirectAttributes redirectAttributes,
- 		   						@RequestParam MultipartFile img) {
-    	if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
-    	    redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
-    	    return "redirect:/ExistingUser?username=" + (username != null ? username : "");
-    	}
-    	String dobError = studentService.validateDateOfBirth(user.getDateOfBirth());
-    	if (dobError != null) {
-    	    redirectAttributes.addFlashAttribute("error", dobError);
-    	    return "redirect:/ExistingUser?username=" + (username != null ? username : "");
-    	}
-    	user.setImageName(img.getOriginalFilename());
-        studentRepo.save(user);
-        if (user != null) {
-    		try {
-    			// Use dynamic path that works in both IDE and JAR
-    			File imgDir;
-    			try {
-    				// Works in development (IDE)
-    				imgDir = new ClassPathResource("static/img").getFile();
-    			} catch (Exception e) {
-    				// Works when running as JAR - use project directory or user directory
-    				String projectDir = System.getProperty("user.dir");
-    				imgDir = new File(projectDir + File.separator + "src" + File.separator + "main" + 
-    				                File.separator + "resources" + File.separator + "static" + File.separator + "img");
-    				if (!imgDir.exists()) {
-    					// Fallback to user home directory
-    					String userHome = System.getProperty("user.home");
-    					imgDir = new File(userHome + File.separator + "HallTicket" + File.separator + "img");
-    				}
-    			}
-    			
-    			// Create directory if it doesn't exist
-    			if (!imgDir.exists()) {
-    				imgDir.mkdirs();
-    			}
-    			
-    			Path path = Paths.get(imgDir.getAbsolutePath() + File.separator + img.getOriginalFilename());
-    			System.out.println("Saving image to: " + path);
-    			Files.copy(img.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-    		}catch(Exception e){
-    			e.printStackTrace();
-    		}
-    	}
-        session.setAttribute("msg", "Details updated successfully.");
-        session.setAttribute("fullName", user.getFullName());
-        redirectAttributes.addFlashAttribute("success", "Details updated successfully.");
-        return "redirect:/UserHomePage?username=" + (username != null ? username : "") + "#profile-section";
+            @RequestParam("username") String username,
+            @PathVariable("id") int id,
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes,
+            @RequestParam(value = "img", required = false) MultipartFile img) {
+        try {
+            username = (username != null) ? username.toLowerCase().trim() : "";
+            StudentModel existingStudent = studentService.getStudentById(id);
+            if (existingStudent == null) {
+                redirectAttributes.addFlashAttribute("error", "Student profile not found.");
+                return "redirect:/UserHomePage?username=" + username;
+            }
+
+            // Validate DOB
+            String dobError = studentService.validateDateOfBirth(user.getDateOfBirth());
+            if (dobError != null) {
+                redirectAttributes.addFlashAttribute("error", dobError);
+                return "redirect:/ExistingUser?username=" + username;
+            }
+
+            // Update fields
+            existingStudent.setFullName(user.getFullName());
+            existingStudent.setMobileNo(user.getMobileNo());
+            existingStudent.setDateOfBirth(user.getDateOfBirth());
+            existingStudent.setInstituteName(user.getInstituteName());
+            existingStudent.setCourse(user.getCourse());
+            existingStudent.setAdmissionForYear(user.getAdmissionForYear());
+            existingStudent.setSemister(user.getSemister());
+
+            // Handle image upload
+            if (img != null && !img.isEmpty()) {
+                try {
+                    String originalFileName = img.getOriginalFilename();
+                    String extension = "";
+                    if (originalFileName != null && originalFileName.contains(".")) {
+                        extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                    }
+                    String fileName = "profile_" + existingStudent.getId() + "_" + System.currentTimeMillis()
+                            + extension;
+
+                    File imgDir;
+                    try {
+                        imgDir = new ClassPathResource("static/img").getFile();
+                    } catch (Exception e) {
+                        String projectDir = System.getProperty("user.dir");
+                        imgDir = new File(projectDir + File.separator + "src" + File.separator + "main" +
+                                File.separator + "resources" + File.separator + "static" + File.separator + "img");
+                    }
+
+                    if (!imgDir.exists())
+                        imgDir.mkdirs();
+
+                    Path path = Paths.get(imgDir.getAbsolutePath() + File.separator + fileName);
+                    Files.copy(img.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                    existingStudent.setImageName(fileName);
+                } catch (Exception e) {
+                    logger.error("Error saving profile image: {}", e.getMessage());
+                }
+            }
+
+            // Update college association
+            if (existingStudent.getInstituteName() != null && !existingStudent.getInstituteName().isBlank()) {
+                CollegeModel college = collegeService.getByInstituteName(existingStudent.getInstituteName());
+                existingStudent.setCollege(college);
+            }
+
+            studentService.save(existingStudent);
+
+            // Sync with UserCredential
+            try {
+                UserCredential credentials = userService.getUserByEmail(existingStudent.getEmail());
+                if (credentials != null) {
+                    credentials.setFullName(existingStudent.getFullName());
+                    credentials.setMobileNo(existingStudent.getMobileNo());
+                    userCredentialRepo.save(credentials);
+                }
+            } catch (Exception e) {
+                logger.error("Error syncing credentials: {}", e.getMessage());
+            }
+
+            session.setAttribute("fullName", existingStudent.getFullName());
+            redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
+        } catch (Exception e) {
+            logger.error("Error updating student profile: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error",
+                    "An error occurred while updating your profile. Please try again.");
+        }
+        return "redirect:/UserHomePage?username=" + username + "#profile-section";
     }
+
     @PostMapping("/stud")
     public String createStudent(@ModelAttribute StudentModel user, @RequestParam(required = false) MultipartFile img,
-            @RequestParam("username") String username, @RequestParam(value = "formToken", required = false) String formToken,
+            @RequestParam("username") String username,
+            @RequestParam(value = "formToken", required = false) String formToken,
             Model model, HttpSession session, RedirectAttributes redirectAttributes) {
-        
+
+        if (username != null) username = username.toLowerCase().trim();
         logger.info("Profile completion POST - username: {}, Institute: {}", username, user.getInstituteName());
-        
+
         if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
             logger.warn("Invalid form token for username: {}", username);
             redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
             return "redirect:/userLoginPage_form";
         }
-        
+
         try {
             if (user.getEmail() == null || user.getEmail().isBlank()) {
                 user.setEmail(username);
             }
-            
+
             // Double check DOB
             String dobError = studentService.validateDateOfBirth(user.getDateOfBirth());
             if (dobError != null) {
@@ -645,22 +954,22 @@ public class HallController {
                 redirectAttributes.addFlashAttribute("error", dobError);
                 return "redirect:/userLoginPage_form";
             }
-            
+
             if (user.getInstituteName() != null && !user.getInstituteName().isBlank()) {
                 CollegeModel college = collegeService.getByInstituteName(user.getInstituteName());
                 user.setCollege(college);
             }
-            
+
             // Set imageName early (fallback)
             if (img != null && !img.isEmpty()) {
                 user.setImageName(img.getOriginalFilename());
             } else {
                 user.setImageName(null);
             }
-            
+
             logger.info("Saving student to DB: {}", user.getEmail());
             user = studentService.createStudent(user);
-            
+
             if (user != null && img != null && !img.isEmpty()) {
                 try {
                     File imgDir;
@@ -668,27 +977,27 @@ public class HallController {
                         imgDir = new ClassPathResource("static/img").getFile();
                     } catch (Exception e) {
                         String projectDir = System.getProperty("user.dir");
-                        imgDir = new File(projectDir + File.separator + "src" + File.separator + "main" + 
-                                        File.separator + "resources" + File.separator + "static" + File.separator + "img");
+                        imgDir = new File(projectDir + File.separator + "src" + File.separator + "main" +
+                                File.separator + "resources" + File.separator + "static" + File.separator + "img");
                     }
-                    
+
                     if (!imgDir.exists()) {
                         imgDir.mkdirs();
                     }
-                    
+
                     String fileName = user.getId() + "_" + System.currentTimeMillis() + "_" + img.getOriginalFilename();
                     Path path = Paths.get(imgDir.getAbsolutePath() + File.separator + fileName);
-                    
+
                     Files.copy(img.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                    
+
                     user.setImageName(fileName);
                     studentService.updateStudent(user);
                     logger.info("Image saved: {}", fileName);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     logger.error("Error during image upload: {}", e.getMessage(), e);
                 }
             }
-            
+
             if (user != null) {
                 user = studentService.getUserByEmail(username);
                 if (user != null) {
@@ -698,18 +1007,19 @@ public class HallController {
                     return "redirect:/UserHomePage?username=" + username;
                 }
             }
-            
+
             logger.warn("Profile completion failed for username: {}", username);
             redirectAttributes.addFlashAttribute("error", "Something went wrong. Please try again.");
             return "redirect:/userLoginPage_form";
-            
+
         } catch (Exception e) {
             logger.error("CRITICAL ERROR in createStudent: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("error", "Server error: " + e.getMessage());
             return "redirect:/userLoginPage_form";
         }
     }
-    /////////////////////////////College/////////////////////////////////
+
+    ///////////////////////////// College/////////////////////////////////
     @GetMapping("/collegeList-form")
     public String viewCollegeList(Model model) {
         List<CollegeModel> listCollege = collegeService.listAll();
@@ -756,11 +1066,13 @@ public class HallController {
         }
         return "redirect:/collegeList-form";
     }
-    /////////////////////Syllabus////////////////////////////////
+
+    ///////////////////// Syllabus////////////////////////////////
     @GetMapping("/Subject-form")
     public String viewSyllabusList(Model model) {
         List<SyllabusModel> listSyllabus = syllabusService.listAll();
         model.addAttribute("listSyllabus", listSyllabus);
+        model.addAttribute("courseList", courseService.listAll());
         System.out.print("Get / ");
         return "SyllabusList";
     }
@@ -768,19 +1080,21 @@ public class HallController {
     @GetMapping("/new2")
     public String add2(Model model) {
         model.addAttribute("syllabus", new SyllabusModel());
+        model.addAttribute("courseList", courseService.listAll());
         return "SyllabusEdit";
     }
 
     @PostMapping("/save_sy")
     public String saveSyllabus(@ModelAttribute("syllabus") SyllabusModel syllabus,
-                               @RequestParam(value = "subjectsJson", required = false) String subjectsJson,
-                               RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "subjectsJson", required = false) String subjectsJson,
+            RedirectAttributes redirectAttributes) {
         // Parse JSON subjects if provided
         if (subjectsJson != null && !subjectsJson.isEmpty()) {
             try {
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                java.util.List<com.example.HAllTicket.dto.SubjectDTO> subjects =
-                    mapper.readValue(subjectsJson, new com.fasterxml.jackson.core.type.TypeReference<java.util.List<com.example.HAllTicket.dto.SubjectDTO>>() {});
+                java.util.List<com.example.HAllTicket.dto.SubjectDTO> subjects = mapper.readValue(subjectsJson,
+                        new com.fasterxml.jackson.core.type.TypeReference<java.util.List<com.example.HAllTicket.dto.SubjectDTO>>() {
+                        });
 
                 // Validate max 20 subjects
                 if (subjects.size() > 20) {
@@ -812,6 +1126,7 @@ public class HallController {
     public String syllabusEdit(@PathVariable(name = "id") int id, Model model) {
         SyllabusModel syllabus = syllabusService.get(id);
         model.addAttribute("syllabus", syllabus);
+        model.addAttribute("courseList", courseService.listAll());
         return "SyllabusEdit";
     }
 
@@ -827,39 +1142,43 @@ public class HallController {
         }
         return "redirect:/Subject-form";
     }
-    //////////////////Exam/////////////////////////
+
+    ////////////////// Exam/////////////////////////
     @GetMapping("/Exam_form")
     public String examForm(@RequestParam("Course") String Course,
-    						@RequestParam("Year") String Year,
-    						@RequestParam("Semister") String Semister,
-    						HttpSession session, Model model) {
-    	model.addAttribute("formToken", FormTokenUtil.generateToken(session));
-    	model.addAttribute("minExamDate", LocalDate.now().plusDays(1).toString());
-    	System.out.println(Course+" here it is");
-    	System.out.println(Year);
-    	System.out.println(Semister);
-    	SyllabusModel syllabus=syllabusService.getUserByDetails(Course,Year,Semister);
-    	
-    	// Always create an ExamModel - never null
-    	ExamModel exam = new ExamModel();
-    	
-    	// Check if syllabus exists, if not create a new ExamModel with the provided details
-    	if (syllabus == null) {
-    	    // Set the course, year, and semister from the form parameters
-    	    exam.setCourse(Course != null ? Course : "");
-    	    exam.setYear(Year != null ? Year : "");
-    	    exam.setSemister(Semister != null ? Semister : "");
-    	    model.addAttribute("error", "No syllabus found for the selected Course, Year, and Semester. Please create the syllabus first or fill in the exam details manually.");
-    	} else {
-    	    // Convert SyllabusModel to ExamModel for the form
-    	    exam.setCourse(syllabus.getCourse() != null ? syllabus.getCourse() : "");
-    	    exam.setYear(syllabus.getYear() != null ? syllabus.getYear() : "");
-    	    exam.setSemister(syllabus.getSemister() != null ? syllabus.getSemister() : "");
-    	}
-    	
-    	// Always add exam to model - ensures it's never null
-    	model.addAttribute("exam", exam);
-    	return "ExamEdit";
+            @RequestParam("Year") String Year,
+            @RequestParam("Semister") String Semister,
+            HttpSession session, Model model) {
+        model.addAttribute("formToken", FormTokenUtil.generateToken(session));
+        model.addAttribute("minExamDate", LocalDate.now().plusDays(1).toString());
+        System.out.println(Course + " here it is");
+        System.out.println(Year);
+        System.out.println(Semister);
+        SyllabusModel syllabus = syllabusService.getUserByDetails(Course, Year, Semister);
+
+        // Always create an ExamModel - never null
+        ExamModel exam = new ExamModel();
+
+        // Check if syllabus exists, if not create a new ExamModel with the provided
+        // details
+        if (syllabus == null) {
+            // Set the course, year, and semister from the form parameters
+            exam.setCourse(Course != null ? Course : "");
+            exam.setYear(Year != null ? Year : "");
+            exam.setSemister(Semister != null ? Semister : "");
+            model.addAttribute("error",
+                    "No syllabus found for the selected Course, Year, and Semester. Please create the syllabus first or fill in the exam details manually.");
+        } else {
+            // Convert SyllabusModel to ExamModel for the form
+            exam.setCourse(syllabus.getCourse() != null ? syllabus.getCourse() : "");
+            exam.setYear(syllabus.getYear() != null ? syllabus.getYear() : "");
+            exam.setSemister(syllabus.getSemister() != null ? syllabus.getSemister() : "");
+        }
+
+        // Always add exam to model - ensures it's never null
+        model.addAttribute("exam", exam);
+        model.addAttribute("courseList", courseService.listAll());
+        return "ExamEdit";
     }
 
     // REST API endpoint to fetch syllabus subjects
@@ -927,6 +1246,7 @@ public class HallController {
     @GetMapping("/new3")
     public String add3(Model model, HttpSession session) {
         model.addAttribute("exam", new ExamModel());
+        model.addAttribute("courseList", courseService.listAll());
         model.addAttribute("formToken", FormTokenUtil.generateToken(session));
         model.addAttribute("minExamDate", LocalDate.now().plusDays(1).toString());
         return "ExamEdit";
@@ -934,9 +1254,9 @@ public class HallController {
 
     @PostMapping("/save_ex")
     public String saveExam(@ModelAttribute("exam") ExamModel exam,
-                          @RequestParam(value = "formToken", required = false) String formToken,
-                          @RequestParam(value = "subjectsJson", required = false) String subjectsJson,
-                          HttpSession session, RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "formToken", required = false) String formToken,
+            @RequestParam(value = "subjectsJson", required = false) String subjectsJson,
+            HttpSession session, RedirectAttributes redirectAttributes) {
         if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
             redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
             return "redirect:/exam-form";
@@ -946,8 +1266,9 @@ public class HallController {
         if (subjectsJson != null && !subjectsJson.isEmpty()) {
             try {
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                java.util.List<com.example.HAllTicket.dto.SubjectDTO> subjects =
-                    mapper.readValue(subjectsJson, new com.fasterxml.jackson.core.type.TypeReference<java.util.List<com.example.HAllTicket.dto.SubjectDTO>>() {});
+                java.util.List<com.example.HAllTicket.dto.SubjectDTO> subjects = mapper.readValue(subjectsJson,
+                        new com.fasterxml.jackson.core.type.TypeReference<java.util.List<com.example.HAllTicket.dto.SubjectDTO>>() {
+                        });
 
                 // Validate max 20 subjects
                 if (subjects.size() > 20) {
@@ -976,7 +1297,8 @@ public class HallController {
                     try {
                         java.time.LocalDate examDate = java.time.LocalDate.parse(subject.getDate());
                         if (examDate.isBefore(today)) {
-                            redirectAttributes.addFlashAttribute("error", "Exam date for '" + subject.getName() + "' cannot be in the past.");
+                            redirectAttributes.addFlashAttribute("error",
+                                    "Exam date for '" + subject.getName() + "' cannot be in the past.");
                             if (exam.getId() > 0) {
                                 return "redirect:/edit3/" + exam.getId();
                             }
@@ -1004,6 +1326,7 @@ public class HallController {
     public String examEdit(@PathVariable(name = "id") int id, Model model, HttpSession session) {
         ExamModel exam = examService.get(id);
         model.addAttribute("exam", exam);
+        model.addAttribute("courseList", courseService.listAll());
         model.addAttribute("formToken", FormTokenUtil.generateToken(session));
         model.addAttribute("minExamDate", LocalDate.now().plusDays(1).toString());
         return "ExamEdit1";
@@ -1021,46 +1344,51 @@ public class HallController {
         }
         return "redirect:/exam-form";
     }
-    
+
     @PostMapping("/examAp")
     public String examAp(@ModelAttribute HallTicketModel hallTicketModel, @ModelAttribute StudentModel user,
-                        @RequestParam("username") String username, @RequestParam(value = "formToken", required = false) String formToken,
-                        HttpSession session, RedirectAttributes redirectAttributes) {
-    	if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
-    	    redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
-    	    return "redirect:/UserHomePage?username=" + (username != null ? username : "");
-    	}
-    	String email = (hallTicketModel.getEmail() != null && !hallTicketModel.getEmail().isEmpty()) ? hallTicketModel.getEmail() : username;
-    	String examName = hallTicketModel.getExamName();
-    	if (examName != null && hallTicketService.hasPendingRequest(email, examName)) {
-    	    redirectAttributes.addFlashAttribute("error", "You already have a pending application for this exam. Please wait for approval.");
-    	    return "redirect:/UserHomePage?username=" + (username != null ? username : "");
-    	}
-    	try {
-    	    if (hallTicketModel.getEmail() == null || hallTicketModel.getEmail().isEmpty()) {
-    	        hallTicketModel.setEmail(username);
-    	        logger.info("Setting email in exam application: {}", username);
-    	    }
-    	    StudentModel student = studentService.getUserByEmail(hallTicketModel.getEmail());
-    	    ExamModel exam = hallTicketModel.getExamName() != null ? examService.get1(hallTicketModel.getExamName()) : null;
-    	    hallTicketModel.setStudent(student);
-    	    hallTicketModel.setExam(exam);
-    	    hallTicketService.createHall(hallTicketModel);
-    	    session.setAttribute("msg", "Exam application submitted successfully!");
-    	    session.setAttribute("username", username);
-    	    redirectAttributes.addFlashAttribute("success", "Exam application submitted successfully!");
-    	} catch (Exception e) {
-    	    logger.error("Error creating exam application: {}", e.getMessage(), e);
-    	    redirectAttributes.addFlashAttribute("error", "Failed to submit exam application. Please try again.");
-    	}
-    	return "redirect:/UserHomePage?username=" + (username != null ? username : "") + "#hall-tickets-section";
+            @RequestParam("username") String username,
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
+            return "redirect:/UserHomePage?username=" + (username != null ? username : "");
+        }
+        String email = (hallTicketModel.getEmail() != null && !hallTicketModel.getEmail().isEmpty())
+                ? hallTicketModel.getEmail()
+                : username;
+        String examName = hallTicketModel.getExamName();
+        if (examName != null && hallTicketService.hasPendingRequest(email, examName)) {
+            redirectAttributes.addFlashAttribute("error",
+                    "You already have a pending application for this exam. Please wait for approval.");
+            return "redirect:/UserHomePage?username=" + (username != null ? username : "");
+        }
+        try {
+            if (hallTicketModel.getEmail() == null || hallTicketModel.getEmail().isEmpty()) {
+                hallTicketModel.setEmail(username);
+                logger.info("Setting email in exam application: {}", username);
+            }
+            StudentModel student = studentService.getUserByEmail(hallTicketModel.getEmail());
+            ExamModel exam = hallTicketModel.getExamName() != null ? examService.get1(hallTicketModel.getExamName())
+                    : null;
+            hallTicketModel.setStudent(student);
+            hallTicketModel.setExam(exam);
+            hallTicketService.createHall(hallTicketModel);
+            session.setAttribute("username", username);
+            redirectAttributes.addFlashAttribute("success", "Exam application submitted successfully!");
+        } catch (Exception e) {
+            logger.error("Error creating exam application: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Failed to submit exam application. Please try again.");
+        }
+        return "redirect:/UserHomePage?username=" + (username != null ? username : "") + "#hall-tickets-section";
     }
 
     @PostMapping("/cancel-request/{id}")
     public String cancelRequest(@PathVariable("id") int id,
-                               @RequestParam(value = "username", required = false) String usernameParam,
-                               HttpSession session, RedirectAttributes redirectAttributes) {
-        String username = (usernameParam != null && !usernameParam.isEmpty()) ? usernameParam : (String) session.getAttribute("username");
+            @RequestParam(value = "username", required = false) String usernameParam,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        String username = (usernameParam != null && !usernameParam.isEmpty()) ? usernameParam
+                : (String) session.getAttribute("username");
         if (username == null || username.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Session expired. Please sign in again.");
             return "redirect:/signin_page";
@@ -1085,18 +1413,40 @@ public class HallController {
 
     @GetMapping("/hall-form")
     public String hallList(Model model) {
-    	List<HallTicketModel> listhall = hallTicketService.listAll();
+        List<HallTicketModel> listhall = hallTicketService.listAll();
         model.addAttribute("listhall", listhall);
-    	return "HallTicketRequest";
+        model.addAttribute("pageTitle", "All Hall Tickets");
+        return "HallTicketRequest";
     }
+
+    @GetMapping("/requested-halltickets")
+    public String requestedHallTickets(Model model) {
+        List<HallTicketModel> listhall = hallTicketService.listAll().stream()
+                .filter(h -> h.getStatus() == null || !h.getStatus().equalsIgnoreCase("Approved"))
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("listhall", listhall);
+        model.addAttribute("pageTitle", "Create Hall Ticket (Requests)");
+        return "HallTicketRequest";
+    }
+
+    @GetMapping("/issued-halltickets")
+    public String issuedHallTickets(Model model) {
+        List<HallTicketModel> listhall = hallTicketService.listAll().stream()
+                .filter(h -> h.getStatus() != null && h.getStatus().equalsIgnoreCase("Approved"))
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("listhall", listhall);
+        model.addAttribute("pageTitle", "Issued Hall Tickets");
+        return "HallTicketRequest";
+    }
+
     @GetMapping("/edit4/{id}/{ExamName}/{email}")
     public String hallEdit(@PathVariable(name = "id") int id, @PathVariable(name = "ExamName") String ExamName,
-    		@PathVariable(name = "email") String email, Model model, HttpSession session) {
-    	model.addAttribute("formToken", FormTokenUtil.generateToken(session));
+            @PathVariable(name = "email") String email, Model model, HttpSession session) {
+        model.addAttribute("formToken", FormTokenUtil.generateToken(session));
         HallTicketModel hall = hallTicketService.get(id);
         ExamModel exam = examService.get1(ExamName);
         StudentModel stud = studentService.get1(email);
-        
+
         // Check for null values and provide appropriate error messages
         if (hall == null) {
             model.addAttribute("error", "Hall ticket request with ID " + id + " not found.");
@@ -1104,7 +1454,7 @@ public class HallController {
             model.addAttribute("listhall", listhall);
             return "HallTicketRequest";
         }
-        
+
         if (exam == null) {
             model.addAttribute("error", "Exam with name '" + ExamName + "' not found. Please create the exam first.");
             model.addAttribute("hall", hall);
@@ -1112,7 +1462,7 @@ public class HallController {
             model.addAttribute("listhall", listhall);
             return "HallTicketRequest";
         }
-        
+
         if (stud == null) {
             model.addAttribute("error", "Student with email '" + email + "' not found.");
             model.addAttribute("hall", hall);
@@ -1121,12 +1471,48 @@ public class HallController {
             model.addAttribute("listhall", listhall);
             return "HallTicketRequest";
         }
-        
+
         // All objects are valid, proceed with hall ticket generation
-        // CRITICAL: Set the email in the hall ticket - this MUST be set before form binding
+        // CRITICAL: Set the email in the hall ticket - this MUST be set before form
+        // binding
         hall.setEmail(email);
         logger.info("Setting email in hall ticket - ID: {}, Email: {}", hall.getId(), email);
-        
+
+        // Assign specific sequential seat number if it does not exist
+        if (hall.getSeatNo() == null || hall.getSeatNo().isEmpty() || hall.getSeatNo().equals("null")) {
+            String prefix = "";
+            if (exam != null) {
+                prefix = (exam.getCourse() != null ? exam.getCourse() : "") + 
+                         (exam.getYear() != null ? exam.getYear() : "") + 
+                         (exam.getSemister() != null ? exam.getSemister() : "");
+            }
+            if (prefix.isEmpty()) {
+                 prefix = hall.getExamName() != null ? hall.getExamName().replaceAll("\\s+", "") : "EXAM";
+            }
+            prefix = prefix + "-S";
+            
+            java.util.List<String> allocatedSeats = hallTicketService.findAllocatedSeatsByExamName(hall.getExamName());
+            java.util.Set<Integer> usedNumbers = new java.util.HashSet<>();
+            for (String seat : allocatedSeats) {
+                if (seat != null && seat.startsWith(prefix)) {
+                    try {
+                        String numStr = seat.substring(prefix.length());
+                        usedNumbers.add(Integer.parseInt(numStr));
+                    } catch (NumberFormatException e) {
+                        // ignore
+                    }
+                }
+            }
+            
+            int nextNum = 1;
+            while (usedNumbers.contains(nextNum)) {
+                nextNum++;
+            }
+            
+            hall.setSeatNo(prefix + nextNum);
+            logger.info("Generated new sequential seat number: {} for Hall Ticket ID: {}", hall.getSeatNo(), hall.getId());
+        }
+
         // Also save it to database immediately to ensure it persists
         try {
             hallTicketService.save(hall);
@@ -1134,65 +1520,75 @@ public class HallController {
         } catch (Exception e) {
             logger.error("Error saving email to database: {}", e.getMessage(), e);
         }
-        
+
         model.addAttribute("hall", hall);
         model.addAttribute("exam", exam);
         model.addAttribute("stud", stud);
-       
+
         return "HallTicketGeneration";
     }
+
     @GetMapping("/HallTicketGeneration")
     public String hallTicket() {
-    	return "HallTicketGeneration";
+        return "HallTicketGeneration";
     }
+
     @GetMapping("/delete4/{id}")
     public String deleteHall(@PathVariable(name = "id") int id, RedirectAttributes redirectAttributes) {
-    	try {
-    	    hallTicketService.delete(id);
-    	    redirectAttributes.addFlashAttribute("success", "Hall ticket request deleted successfully!");
-    	} catch (Exception e) {
-    	    System.err.println("Error deleting hall ticket: " + e.getMessage());
-    	    e.printStackTrace();
-    	    redirectAttributes.addFlashAttribute("error", "Failed to delete hall ticket: " + e.getMessage());
-    	}
+        try {
+            hallTicketService.delete(id);
+            redirectAttributes.addFlashAttribute("success", "Hall ticket request deleted successfully!");
+        } catch (Exception e) {
+            System.err.println("Error deleting hall ticket: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Failed to delete hall ticket: " + e.getMessage());
+        }
         return "redirect:/hall-form";
     }
+
     @PostMapping("/save_hall")
     public String saveHall(@ModelAttribute("hall") HallTicketModel hall,
-    		@RequestParam(value = "formToken", required = false) String formToken,
-    		HttpSession session, HttpServletRequest request, RedirectAttributes redirectAttributes) {
-    	if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
-    	    redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
-    	    return "redirect:/hall-form";
-    	}
-    	logger.info("Saving hall ticket - ID: {}, SeatNo: {}, ExamName: {}, StudentName: {}, Email: {}", 
-    	        hall.getId(), hall.getSeatNo(), hall.getExamName(), hall.getStudentName(), hall.getEmail());
-    	
-    	// CRITICAL: Ensure email is set - this is required for student dashboard filtering
-    	if (hall.getEmail() == null || hall.getEmail().isEmpty()) {
-    	    logger.error("Email is missing in hall ticket! This will prevent it from showing on student dashboard.");
-    	    redirectAttributes.addFlashAttribute("error", "Email is required. Please go back and try again.");
-    	    return "redirect:/hall-form";
-    	}
-    	StudentModel student = studentService.getUserByEmail(hall.getEmail());
-    	ExamModel exam = hall.getExamName() != null ? examService.get1(hall.getExamName()) : null;
+            @RequestParam(value = "formToken", required = false) String formToken,
+            HttpSession session, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
+            return "redirect:/hall-form";
+        }
+        logger.info("Saving hall ticket - ID: {}, SeatNo: {}, ExamName: {}, StudentName: {}, Email: {}",
+                hall.getId(), hall.getSeatNo(), hall.getExamName(), hall.getStudentName(), hall.getEmail());
+
+        // CRITICAL: Ensure email is set - this is required for student dashboard
+        // filtering
+        if (hall.getEmail() == null || hall.getEmail().isEmpty()) {
+            logger.error("Email is missing in hall ticket! This will prevent it from showing on student dashboard.");
+            redirectAttributes.addFlashAttribute("error", "Email is required. Please go back and try again.");
+            return "redirect:/hall-form";
+        }
+        StudentModel student = studentService.getUserByEmail(hall.getEmail());
+        ExamModel exam = hall.getExamName() != null ? examService.get1(hall.getExamName()) : null;
         if (exam != null) {
             hall.setExamName(exam.getExamName()); // Normalize name from official DB record
             hall.setExam(exam); // Set direct link
         }
-    	hall.setStudent(student);
-        
+        hall.setStudent(student);
+
         // SYNC: Copy subjects from exam to hall ticket list for permanent storage
         if (exam != null && exam.getSubjects() != null && !exam.getSubjects().isEmpty()) {
             hall.setSubjects(new ArrayList<>(exam.getSubjects()));
             // Sync to legacy fields for max PDF compatibility
             List<SubjectDTO> subjects = exam.getSubjects();
-            if (subjects.size() >= 1) hall.setSub1(subjects.get(0).getName());
-            if (subjects.size() >= 2) hall.setSub2(subjects.get(1).getName());
-            if (subjects.size() >= 3) hall.setSub3(subjects.get(2).getName());
-            if (subjects.size() >= 4) hall.setSub4(subjects.get(3).getName());
-            if (subjects.size() >= 5) hall.setSub5(subjects.get(4).getName());
-            if (subjects.size() >= 6) hall.setSub6(subjects.get(5).getName());
+            if (subjects.size() >= 1)
+                hall.setSub1(subjects.get(0).getName());
+            if (subjects.size() >= 2)
+                hall.setSub2(subjects.get(1).getName());
+            if (subjects.size() >= 3)
+                hall.setSub3(subjects.get(2).getName());
+            if (subjects.size() >= 4)
+                hall.setSub4(subjects.get(3).getName());
+            if (subjects.size() >= 5)
+                hall.setSub5(subjects.get(4).getName());
+            if (subjects.size() >= 6)
+                hall.setSub6(subjects.get(5).getName());
             logger.info("Copied {} subjects from exam to hall ticket (JSON + Legacy)", exam.getSubjects().size());
         } else if (exam != null) {
             // Fallback for legacy exam fields
@@ -1225,83 +1621,93 @@ public class HallController {
             logger.info("Copied {} legacy subjects from exam to hall ticket", legacySubjects.size());
         }
 
-    	// Validate and set SeatNo if missing
-    	if (hall.getSeatNo() == null || hall.getSeatNo().isEmpty() || hall.getSeatNo().equals("null")) {
-    	    // Generate a unique seat number
-    	    String seatNo = "SEAT-" + (hall.getId() > 0 ? hall.getId() : System.currentTimeMillis());
-    	    hall.setSeatNo(seatNo);
-    	}
-    	
-    	// Generate QR code BEFORE saving to ensure we have all data
-    	try {
-	         logger.info("Generating QR code for SeatNo: {}", hall.getSeatNo());
-	         String baseUrl = ServletUriComponentsBuilder.fromRequest(request).replacePath(null).build().toUriString();
-	         BufferedImage bufferedImage = generateQRCodeImage(hall, baseUrl);
-	         String imagePath = "img-" + hall.getSeatNo().replaceAll("[^a-zA-Z0-9]", "-") + ".jpg";
-	         
-	         // Use dynamic path that works in both IDE and JAR
-	         File qrDir;
-	         try {
-	             // Works in development (IDE)
-	             qrDir = new ClassPathResource("static/qr").getFile();
-	             logger.info("Using IDE path: {}", qrDir.getAbsolutePath());
-	         } catch (Exception e) {
-	             // Works when running as JAR - use project directory or user home
-	             String projectDir = System.getProperty("user.dir");
-	             qrDir = new File(projectDir + File.separator + "src" + File.separator + "main" + 
-	                             File.separator + "resources" + File.separator + "static" + File.separator + "qr");
-	             if (!qrDir.exists()) {
-	                 // Fallback to user home directory
-	                 String userHome = System.getProperty("user.home");
-	                 qrDir = new File(userHome + File.separator + "HallTicket" + File.separator + "qr");
-	             }
-	             logger.info("Using JAR path: {}", qrDir.getAbsolutePath());
-	         }
-	         
-	         // Create directory if it doesn't exist
-	         if (!qrDir.exists()) {
-	             boolean created = qrDir.mkdirs();
-	             logger.info("QR directory created: {} (success: {})", qrDir.getAbsolutePath(), created);
-	         }
-	         
-	         File outputfile = new File(qrDir, imagePath);
-	         ImageIO.write(bufferedImage, "jpg", outputfile);
-	         logger.info("QR code saved to: {}", outputfile.getAbsolutePath());
-	         
-	         // Save QR code path to database
-	         hall.setQrName(imagePath);
-	         logger.info("QR code path saved to hall ticket: {}", imagePath);
-	         
-	         // CRITICAL: Set status to "Approved" when QR code is successfully generated
-	         hall.setStatus("Approved");
-	         logger.info("Status changed to 'Approved' for hall ticket ID: {}", hall.getId());
+        // Restore SeatNo from database if lost during form mapping
+        if (hall.getId() > 0 && (hall.getSeatNo() == null || hall.getSeatNo().isEmpty() || "null".equals(hall.getSeatNo()))) {
+            HallTicketModel existing = hallTicketService.get(hall.getId());
+            if (existing != null && existing.getSeatNo() != null && !existing.getSeatNo().isEmpty()) {
+                hall.setSeatNo(existing.getSeatNo());
+                logger.info("Restored SeatNo {} from database for Hall Ticket ID: {}", hall.getSeatNo(), hall.getId());
+            }
+        }
 
-    	} catch (Exception e) {
-	         logger.error("QR Code generation failed for hall ticket ID: {}, SeatNo: {}", 
-	                 hall.getId(), hall.getSeatNo(), e);
-	         e.printStackTrace();
-	         // Continue to save hall ticket even if QR generation fails
-	         redirectAttributes.addFlashAttribute("warning", 
-	                 "Hall ticket saved, but QR code generation failed: " + e.getMessage());
-	     }
-    	
-    	try {
-    	    logger.info("Saving hall ticket to database - ID: {}, Email: {}, QR: {}", 
-    	            hall.getId(), hall.getEmail(), hall.getQrName());
-    	    hallTicketService.save(hall);
-    	    logger.info("Hall ticket saved successfully - ID: {}, Email: {}, QR: {}", 
-    	            hall.getId(), hall.getEmail(), hall.getQrName());
-    	    if (!redirectAttributes.getFlashAttributes().containsKey("success") && 
-    	        !redirectAttributes.getFlashAttributes().containsKey("warning")) {
-    	        redirectAttributes.addFlashAttribute("success", "Hall ticket saved successfully with QR code!");
-    	    }
-    	} catch (Exception e) {
-    	    logger.error("Error saving hall ticket: {}", e.getMessage(), e);
-    	    redirectAttributes.addFlashAttribute("error", "Failed to save hall ticket. Please try again.");
-    	    return "redirect:/hall-form";
-    	}
-          
-        return "redirect:/hall-form";
+        // Validate and set SeatNo if missing (redundant check, just in case)
+        if (hall.getSeatNo() == null || hall.getSeatNo().isEmpty() || hall.getSeatNo().equals("null")) {
+            // Generate a unique seat number fallback
+            String seatNo = "SEAT-" + (hall.getId() > 0 ? hall.getId() : System.currentTimeMillis());
+            hall.setSeatNo(seatNo);
+            logger.info("Generated fallback SeatNo {} for Hall Ticket ID: {}", hall.getSeatNo(), hall.getId());
+        }
+
+        // Generate QR code BEFORE saving to ensure we have all data
+        try {
+            logger.info("Generating QR code for SeatNo: {}", hall.getSeatNo());
+            String baseUrl = ServletUriComponentsBuilder.fromRequest(request).replacePath(null).build().toUriString();
+            BufferedImage bufferedImage = generateQRCodeImage(hall, baseUrl);
+            String imagePath = "img-" + hall.getSeatNo().replaceAll("[^a-zA-Z0-9]", "-") + ".jpg";
+
+            // Use dynamic path that works in both IDE and JAR
+            File qrDir;
+            try {
+                // Works in development (IDE)
+                qrDir = new ClassPathResource("static/qr").getFile();
+                logger.info("Using IDE path: {}", qrDir.getAbsolutePath());
+            } catch (Exception e) {
+                // Works when running as JAR - use project directory or user home
+                String projectDir = System.getProperty("user.dir");
+                qrDir = new File(projectDir + File.separator + "src" + File.separator + "main" +
+                        File.separator + "resources" + File.separator + "static" + File.separator + "qr");
+                if (!qrDir.exists()) {
+                    // Fallback to user home directory
+                    String userHome = System.getProperty("user.home");
+                    qrDir = new File(userHome + File.separator + "HallTicket" + File.separator + "qr");
+                }
+                logger.info("Using JAR path: {}", qrDir.getAbsolutePath());
+            }
+
+            // Create directory if it doesn't exist
+            if (!qrDir.exists()) {
+                boolean created = qrDir.mkdirs();
+                logger.info("QR directory created: {} (success: {})", qrDir.getAbsolutePath(), created);
+            }
+
+            File outputfile = new File(qrDir, imagePath);
+            ImageIO.write(bufferedImage, "jpg", outputfile);
+            logger.info("QR code saved to: {}", outputfile.getAbsolutePath());
+
+            // Save QR code path to database
+            hall.setQrName(imagePath);
+            logger.info("QR code path saved to hall ticket: {}", imagePath);
+
+            // CRITICAL: Set status to "Approved" when QR code is successfully generated
+            hall.setStatus("Approved");
+            logger.info("Status changed to 'Approved' for hall ticket ID: {}", hall.getId());
+
+        } catch (Exception e) {
+            logger.error("QR Code generation failed for hall ticket ID: {}, SeatNo: {}",
+                    hall.getId(), hall.getSeatNo(), e);
+            e.printStackTrace();
+            // Continue to save hall ticket even if QR generation fails
+            redirectAttributes.addFlashAttribute("warning",
+                    "Hall ticket saved, but QR code generation failed: " + e.getMessage());
+        }
+
+        try {
+            logger.info("Saving hall ticket to database - ID: {}, Email: {}, QR: {}",
+                    hall.getId(), hall.getEmail(), hall.getQrName());
+            hallTicketService.save(hall);
+            logger.info("Hall ticket saved successfully - ID: {}, Email: {}, QR: {}",
+                    hall.getId(), hall.getEmail(), hall.getQrName());
+            if (!redirectAttributes.getFlashAttributes().containsKey("success") &&
+                    !redirectAttributes.getFlashAttributes().containsKey("warning")) {
+                redirectAttributes.addFlashAttribute("success", "Hall ticket saved successfully with QR code!");
+            }
+        } catch (Exception e) {
+            logger.error("Error saving hall ticket: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Failed to save hall ticket. Please try again.");
+            return "redirect:/requested-halltickets";
+        }
+
+        return "redirect:/issued-halltickets";
     }
 
     /** Public view of an approved hall ticket (linked from QR code). */
@@ -1316,8 +1722,10 @@ public class HallController {
             model.addAttribute("error", "This hall ticket is not yet approved.");
             return "HallTicketView";
         }
-        ExamModel exam = hall.getExam() != null ? hall.getExam() : (hall.getExamName() != null ? examService.get1(hall.getExamName()) : null);
-        StudentModel stud = hall.getStudent() != null ? hall.getStudent() : (hall.getEmail() != null ? studentService.getUserByEmail(hall.getEmail()) : null);
+        ExamModel exam = hall.getExam() != null ? hall.getExam()
+                : (hall.getExamName() != null ? examService.get1(hall.getExamName()) : null);
+        StudentModel stud = hall.getStudent() != null ? hall.getStudent()
+                : (hall.getEmail() != null ? studentService.getUserByEmail(hall.getEmail()) : null);
         model.addAttribute("hall", hall);
         model.addAttribute("exam", exam);
         model.addAttribute("stud", stud);
@@ -1334,39 +1742,55 @@ public class HallController {
         if (!"Approved".equals(hall.getStatus())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        ExamModel exam = hall.getExam() != null ? hall.getExam() : (hall.getExamName() != null ? examService.get1(hall.getExamName()) : null);
-        StudentModel stud = hall.getStudent() != null ? hall.getStudent() : (hall.getEmail() != null ? studentService.getUserByEmail(hall.getEmail()) : null);
+        ExamModel exam = hall.getExam() != null ? hall.getExam()
+                : (hall.getExamName() != null ? examService.get1(hall.getExamName()) : null);
+        StudentModel stud = hall.getStudent() != null ? hall.getStudent()
+                : (hall.getEmail() != null ? studentService.getUserByEmail(hall.getEmail()) : null);
         byte[] pdf = pdfGeneratorService.generateHallTicketPdf(hall, exam, stud);
         if (pdf == null) {
             return ResponseEntity.internalServerError().build();
         }
         String filename = "hall-ticket-" + (hall.getSeatNo() != null ? hall.getSeatNo() : id) + ".pdf";
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-            .contentType(MediaType.APPLICATION_PDF)
-            .body(pdf);
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
     public static BufferedImage generateQRCodeImage(HallTicketModel hallTicket, String baseUrl) throws Exception {
         if (hallTicket == null) {
             throw new IllegalArgumentException("Hall ticket cannot be null");
         }
-        String qrContent;
-        if (baseUrl != null && !baseUrl.isEmpty() && hallTicket.getId() > 0) {
-            qrContent = baseUrl + "/hall-ticket/view/" + hallTicket.getId();
-        } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Hall Ticket Information\n");
-            sb.append("Seat No: ").append(hallTicket.getSeatNo() != null ? hallTicket.getSeatNo() : "N/A").append("\n");
-            sb.append("Student: ").append(hallTicket.getStudentName() != null ? hallTicket.getStudentName() : "N/A").append("\n");
-            sb.append("Exam: ").append(hallTicket.getExamName() != null ? hallTicket.getExamName() : "N/A").append("\n");
-            sb.append("Institute: ").append(hallTicket.getInstituteName() != null ? hallTicket.getInstituteName() : "N/A").append("\n");
-            sb.append("Status: ").append(hallTicket.getStatus() != null ? hallTicket.getStatus() : "N/A");
-            qrContent = sb.toString();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- E-HALL TICKET OFFICE COPY ---\n");
+        sb.append("Institute: ").append(hallTicket.getInstituteName() != null ? hallTicket.getInstituteName() : "N/A").append("\n");
+        sb.append("Exam: ").append(hallTicket.getExamName() != null ? hallTicket.getExamName() : "N/A").append("\n");
+        sb.append("Student: ").append(hallTicket.getStudentName() != null ? hallTicket.getStudentName() : "N/A").append("\n");
+        sb.append("Seat No: ").append(hallTicket.getSeatNo() != null ? hallTicket.getSeatNo() : "N/A").append("\n\n");
+        
+        // Include Schedule
+        List<com.example.HAllTicket.dto.SubjectDTO> subjects = hallTicket.getSubjects();
+        if (subjects != null && !subjects.isEmpty()) {
+            sb.append("EXAM SCHEDULE:\n");
+            int count = 0;
+            for (com.example.HAllTicket.dto.SubjectDTO s : subjects) {
+                if (count++ >= 10) break; // Limit to keep QR readable
+                sb.append("- ").append(s.getName()).append(" (")
+                  .append(s.getDate() != null ? s.getDate() : "Date TBD").append(")\n");
+            }
+            sb.append("\n");
         }
+        
+        if (baseUrl != null && !baseUrl.isEmpty() && hallTicket.getId() > 0) {
+            sb.append("Verify: ").append(baseUrl).append("/hall-ticket/view/").append(hallTicket.getId());
+        }
+        
+        String qrContent = sb.toString();
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 300, 300);
+        // Slightly higher margin for better scanning
+        BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 380, 380);
         return MatrixToImageWriter.toBufferedImage(bitMatrix);
     }
-///th:value="${syllabus.CourseName} + ' ' + ${syllabus.Year}"
+    /// th:value="${syllabus.CourseName} + ' ' + ${syllabus.Year}"
 }

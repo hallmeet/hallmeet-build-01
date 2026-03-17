@@ -19,48 +19,69 @@
                 </div>
             </div>
             <div class="card-body">
-                <table id="examTable" class="table table-bordered table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Exam Name</th>
-                            <th>Course</th>
-                            <th>Year</th>
-                            <th>Semester</th>
-                            <th>Subject 1</th>
-                            <th>Subject 2</th>
-                            <th>Subject 3</th>
-                            <th>Subject 4</th>
-                            <th>Subject 5</th>
-                            <th>Subject 6</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="exam, stat : ${listExam}">
-                            <td th:text="${stat.count}"></td>
-                            <td th:text="${exam?.examName ?: exam?.ExamName ?: 'N/A'}"></td>
-                            <td th:text="${exam.Course}"></td>
-                            <td th:text="${exam.Year}"></td>
-                            <td th:text="${exam.Semister}"></td>
-                            <td th:text="${#lists.size(exam.subjects) >= 1 ? exam.subjects[0].name : (exam.Sub1 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(exam.subjects) >= 2 ? exam.subjects[1].name : (exam.Sub2 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(exam.subjects) >= 3 ? exam.subjects[2].name : (exam.Sub3 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(exam.subjects) >= 4 ? exam.subjects[4-1].name : (exam.Sub4 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(exam.subjects) >= 5 ? exam.subjects[5-1].name : (exam.Sub5 ?: 'N/A')}"></td>
-                            <td th:text="${#lists.size(exam.subjects) >= 6 ? exam.subjects[6-1].name : (exam.Sub6 ?: 'N/A')}"></td>
-                            <td>
-                                <a class="btn btn-sm btn-primary" th:href="@{'/edit3/' + ${exam.id}}" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a class="btn btn-sm btn-danger" th:href="@{'/delete3/' + ${exam.id}}" 
-                                   onclick="return confirm('Are you sure you want to delete this exam?');" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <style>
+                    #examTable thead th {
+                        vertical-align: middle;
+                        text-align: center;
+                        background-color: #f0f4ff;
+                        color: #4f46e5;
+                        font-weight: 600;
+                        white-space: nowrap;
+                        border-bottom: 2px solid #e2e8f0;
+                    }
+                    #examTable tbody td {
+                        vertical-align: middle;
+                        text-align: center;
+                    }
+                    #examTable tbody td:nth-child(2),
+                    #examTable tbody td:nth-child(3) {
+                        text-align: left;
+                    }
+                </style>
+                <div class="table-wrap">
+                    <table id="examTable" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Exam Name</th>
+                                <th>Course</th>
+                                <th>Year</th>
+                                <th>Semester</th>
+                                <th>Subject 1</th>
+                                <th>Subject 2</th>
+                                <th>Subject 3</th>
+                                <th>Subject 4</th>
+                                <th>Subject 5</th>
+                                <th>Subject 6</th>
+                                <th style="min-width: 100px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="exam, stat : ${listExam}">
+                                <td th:text="${stat.count}"></td>
+                                <td th:text="${exam?.examName ?: exam?.ExamName ?: 'N/A'}"></td>
+                                <td th:text="${exam.Course}"></td>
+                                <td th:text="${exam.Year}"></td>
+                                <td th:text="${exam.Semister}"></td>
+                                <td th:text="${#lists.size(exam.subjects) >= 1 ? exam.subjects[0].name : (exam.Sub1 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(exam.subjects) >= 2 ? exam.subjects[1].name : (exam.Sub2 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(exam.subjects) >= 3 ? exam.subjects[2].name : (exam.Sub3 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(exam.subjects) >= 4 ? exam.subjects[4-1].name : (exam.Sub4 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(exam.subjects) >= 5 ? exam.subjects[5-1].name : (exam.Sub5 ?: 'N/A')}"></td>
+                                <td th:text="${#lists.size(exam.subjects) >= 6 ? exam.subjects[6-1].name : (exam.Sub6 ?: 'N/A')}"></td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" th:href="@{'/edit3/' + ${exam.id}}" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a class="btn btn-sm btn-danger" th:href="@{'/delete3/' + ${exam.id}}" 
+                                       onclick="return confirm('Are you sure you want to delete this exam?');" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

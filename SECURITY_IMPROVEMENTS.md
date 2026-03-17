@@ -109,7 +109,7 @@ public class PasswordHasher {
 Then update your database:
 
 ```sql
-UPDATE admin_model SET password = '$2a$10$...' WHERE email = 'saurabh@gmail.com';
+UPDATE admin_model SET password = '$2a$10$...' WHERE email = 'swapnil@gmail.com';
 ```
 
 **Option B: Create Migration Endpoint**

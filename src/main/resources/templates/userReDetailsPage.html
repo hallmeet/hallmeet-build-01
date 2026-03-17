@@ -13,20 +13,6 @@
                 </h3>
             </div>
             <div class="card-body">
-                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    <span th:text="${error}"></span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    <span th:text="${info}"></span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
                 <form method="post" th:action="@{/stud}" enctype="multipart/form-data" id="studentDetailsForm">
                     <input type="hidden" name="formToken" th:value="${formToken}">
                     <input type="hidden" th:value="${user.email}" name="username">
@@ -91,10 +77,10 @@
                                 </label>
                                 <select name="Course" class="form-control" id="course" required>
                                     <option value="">Select Course</option>
-                                    <option value="MCA">MCA</option>
-                                    <option value="MBA">MBA</option>
-                                    <option value="BE">BE</option>
-                                    <option value="B.TECH">B.TECH</option>
+                                    <option th:each="course : ${courseList}" 
+                                            th:value="${course.courseName}" 
+                                            th:text="${course.courseName}"></option>
+                                    <option th:if="${#lists.isEmpty(courseList)}" disabled value="">No courses available</option>
                                 </select>
                             </div>
                         </div>
@@ -140,9 +126,7 @@
                         <small class="form-text text-muted">Upload your profile picture (JPG, PNG, etc.)</small>
                     </div>
                     
-                    <div th:if="${session.msg}" class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle mr-1"></i><span th:text="${session.msg}"></span>
-                    </div>
+
                     
                     <div class="form-group mt-4">
                         <button type="submit" name="search" class="btn btn-primary btn-lg" id="submitBtn">

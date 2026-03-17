@@ -533,36 +533,54 @@ input[type="search"],
 input[type="tel"],
 input[type="url"] {
     border-radius: 25px !important;
-    padding: 12px 16px;
+    padding: 10px 20px;
     font-family: var(--font-family-base);
     font-size: 1rem;
-    line-height: var(--line-height-normal);
+    height: auto;
+    min-height: 50px;
+    line-height: 1.5;
     color: var(--color-text);
     background-color: var(--color-surface);
     border: 2px solid var(--color-border);
     transition: all var(--transition-fast);
     box-shadow: var(--shadow-sm);
+    display: block;
+    width: 100%;
 }
 
-input:hover,
-textarea:hover,
-select:hover,
-.form-control:hover,
-.form-select:hover {
-    border-color: var(--color-primary-light);
-    box-shadow: var(--shadow-md);
+/* Consistent branding for select elements */
+select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236366f1' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 1.25rem center !important;
+    background-size: 1rem !important;
+    padding-right: 3.5rem !important;
+    cursor: pointer;
+    background-color: var(--color-surface) !important;
 }
 
-input:focus,
-textarea:focus,
-select:focus,
-.form-control:focus,
-.form-select:focus {
+/* Styling the actual dropdown option list (Limited support but helpful for consistency) */
+select option {
+    background-color: var(--color-surface) !important;
+    color: var(--color-text) !important;
+    padding: 15px !important;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+select option:checked,
+select option:hover {
+    background-color: var(--color-primary) !important;
+    color: white !important;
+}
+
+/* Fix for internal spacing in select boxes */
+select.form-control:focus {
     border-color: var(--color-primary);
-    background-color: var(--color-surface-light);
-    box-shadow: 0 0 0 4px var(--color-surface-accent), var(--shadow-lg);
-    outline: none;
-    border-radius: 25px !important;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
 }
 
 input::placeholder {
@@ -573,6 +591,89 @@ textarea {
     resize: vertical;
     min-height: 120px;
     border-radius: 25px !important;
+}
+
+/* Date and Time input specific styling */
+input[type="date"],
+input[type="time"] {
+    position: relative;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+    padding-right: 3rem; /* Space for the icon */
+    color-scheme: light; /* Ensures the native picker is predictably styled */
+}
+
+/* Custom calendar icon for date inputs */
+input[type="date"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236366f1' class='bi bi-calendar-event' viewBox='0 0 16 16'%3E%3Cpath d='M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z'/%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.25rem center;
+    background-size: 1.1rem;
+}
+
+/* Custom clock icon for time inputs */
+input[type="time"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236366f1' class='bi bi-clock' viewBox='0 0 16 16'%3E%3Cpath d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z'/%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.25rem center;
+    background-size: 1.1rem;
+}
+
+/* Make the native picker indicator cover the whole input to allow clicking anywhere */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+/* Internal padding and styling for date/time values */
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit {
+    padding-left: 0.5rem;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="time"]::-webkit-datetime-edit-text {
+    color: var(--color-text-tertiary);
+    padding: 0 0.2rem;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field,
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field,
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+    color: var(--color-text);
+    font-weight: 500;
+    padding: 0 0.1rem;
+    border-radius: 4px;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Ensure text is above the native indicator */
+input[type="date"]::before,
+input[type="time"]::before {
+    z-index: 1;
 }
 
 /* Form group styling */

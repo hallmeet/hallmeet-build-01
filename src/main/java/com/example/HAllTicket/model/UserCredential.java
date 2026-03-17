@@ -22,4 +22,12 @@ public class UserCredential {
     private String mobileNo;
     private String role;
     private boolean deleted = false;
+
+    public void setEmail(String email) {
+        if (email != null) {
+            this.email = email.toLowerCase().trim();
+        } else {
+            this.email = null;
+        }
+    }
 }

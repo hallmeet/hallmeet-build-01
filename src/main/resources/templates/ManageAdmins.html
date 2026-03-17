@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-base::layout(~{::section})}">
+<head>
+    <meta charset="utf-8">
+    <title>Manage Administrators</title>
+    <style>
+        .toggle-password, .toggle-password i {
+            transition: none !important;
+            animation: none !important;
+        }
+    </style>
+</head>
+<body>
+    <section th:fragment="content">
+        <div class="container-fluid">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-end align-items-center mb-4">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAdminModal" style="border-radius: 12px; font-weight: 600;">
+                    <i class="fas fa-plus mr-2"></i>Add New Admin
+                </button>
+            </div>
+
+            <!-- Admins Table -->
+            <div class="card shadow mb-4" style="border-radius: 15px; border: none;">
+                <div class="card-body">
+                    <div class="table-wrap">
+                        <table class="table table-hover" id="adminsTable" width="100%" cellspacing="0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Mobile No</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="admin, iterStat : ${admins}" th:classappend="${#strings.equalsIgnoreCase(session.username, admin.email)} ? 'table-primary' : ''">
+                                    <td th:text="${iterStat.count}"></td>
+                                    <td>
+                                        <span th:text="${admin.fullName}" style="font-weight: 600;"></span>
+                                        <span th:if="${#strings.equalsIgnoreCase(session.username, admin.email)}" class="badge badge-primary ml-2">YOU</span>
+                                    </td>
+                                    <td th:text="${admin.email}"></td>
+                                    <td th:text="${admin.mobileNo}"></td>
+                                    <td><span class="badge badge-info" th:text="${admin.role}"></span></td>
+                                    <td>
+                                        <a th:if="${!#strings.equalsIgnoreCase(session.username, admin.email)}" 
+                                           th:href="@{'/delete-admin/' + ${admin.id}}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           onclick="return confirm('Are you sure you want to remove this admin?')"
+                                           style="border-radius: 8px;">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        <span th:if="${#strings.equalsIgnoreCase(session.username, admin.email)}" class="text-muted small">Current User</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Admin Modal -->
+        <div class="modal fade" id="addAdminModal" tabindex="-1" role="dialog" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content" style="border-radius: 20px; border: none;">
+                    <form th:action="@{/save-new-admin}" method="post" th:object="${newAdmin}">
+                        <input type="hidden" name="formToken" th:value="${formToken}">
+                        <div class="modal-header bg-primary text-white" style="border-radius: 20px 20px 0 0;">
+                            <h5 class="modal-title" id="addAdminModalLabel" style="font-weight: 700;">Create New Admin</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="form-group mb-3">
+                                <label style="font-weight: 600;">Full Name</label>
+                                <input type="text" th:field="*{fullName}" class="form-control" style="border-radius: 10px;" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label style="font-weight: 600;">Email Address</label>
+                                <input type="email" th:field="*{email}" class="form-control" style="border-radius: 10px;" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label style="font-weight: 600;">Mobile Number</label>
+                                <input type="text" th:field="*{mobileNo}" class="form-control" style="border-radius: 10px;" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label style="font-weight: 600;">Password</label>
+                                <div class="input-group">
+                                    <input type="password" th:field="*{password}" class="form-control border-right-0" style="border-radius: 10px 0 0 10px;" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text border-left-0 toggle-password" style="border-radius: 0 10px 10px 0; cursor: pointer; background: white;">
+                                            <i class="fas fa-eye text-primary"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius: 10px;">Cancel</button>
+                            <button type="submit" class="btn btn-primary" style="border-radius: 10px; font-weight: 600;">Create Admin</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Password Toggle Logic
+            document.querySelectorAll('.toggle-password').forEach(span => {
+                span.addEventListener('click', function() {
+                    const input = this.closest('.input-group').querySelector('input');
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+        </script>
+    </section>
+</body>
+</html>

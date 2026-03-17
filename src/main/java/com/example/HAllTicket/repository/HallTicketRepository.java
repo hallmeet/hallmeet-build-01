@@ -13,4 +13,7 @@ public interface HallTicketRepository extends JpaRepository<HallTicketModel, Int
 
 	@Query("SELECT COUNT(h) > 0 FROM HallTicketModel h WHERE h.email = :email AND h.ExamName = :examName AND h.Status = :status")
 	boolean existsByEmailAndExamNameAndStatus(@Param("email") String email, @Param("examName") String examName, @Param("status") String status);
+
+	@Query("SELECT h.SeatNo FROM HallTicketModel h WHERE h.ExamName = :examName AND h.SeatNo IS NOT NULL AND h.deleted = false")
+	java.util.List<String> findAllocatedSeatsByExamName(@Param("examName") String examName);
 }

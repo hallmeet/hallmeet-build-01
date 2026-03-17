@@ -19,32 +19,34 @@
                 </div>
             </div>
             <div class="card-body">
-                <table id="collegeTable" class="table table-bordered table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Institute Name</th>
-                            <th>Address</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="college, stat : ${listCollege}">
-                            <td th:text="${stat.count}"></td>
-                            <td th:text="${college.instituteName}"></td>
-                            <td th:text="${college.Address}"></td>
-                            <td>
-                                <a class="btn btn-sm btn-primary" th:href="@{'/edit1/' + ${college.id}}" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a class="btn btn-sm btn-danger" th:href="@{'/delete1/' + ${college.id}}" 
-                                   onclick="return confirm('Are you sure you want to delete this institute?');" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-wrap">
+                    <table id="collegeTable" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Institute Name</th>
+                                <th>Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="college, stat : ${listCollege}">
+                                <td th:text="${stat.count}"></td>
+                                <td th:text="${college.instituteName}"></td>
+                                <td th:text="${college.Address}"></td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" th:href="@{'/edit1/' + ${college.id}}" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a class="btn btn-sm btn-danger" th:href="@{'/delete1/' + ${college.id}}" 
+                                       onclick="return confirm('Are you sure you want to delete this institute?');" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

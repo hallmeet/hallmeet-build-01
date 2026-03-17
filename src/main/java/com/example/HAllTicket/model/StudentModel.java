@@ -26,6 +26,14 @@ public class StudentModel {
 
     private String mobileNo;
 
+    public void setEmail(String email) {
+        if (email != null) {
+            this.email = email.toLowerCase().trim();
+        } else {
+            this.email = null;
+        }
+    }
+
     private String DateOfBirth;
 
     private String instituteName;

@@ -3,6 +3,6 @@
 
 -- Insert default admin user if not present
 INSERT INTO admin_model (email, full_name, mobile_no, password, role, deleted)
-SELECT 'saurabh@gmail.com', 'saurabh borkar', '1234567890', '123456789', 'admin', false
+SELECT 'swapnil@gmail.com', 'swapnil', '1234567890', '123456789', 'admin', false
 FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM admin_model WHERE email = 'saurabh@gmail.com');
+WHERE NOT EXISTS (SELECT 1 FROM admin_model WHERE email = 'swapnil@gmail.com');

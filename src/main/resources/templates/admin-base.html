@@ -37,43 +37,68 @@
 
         /* Nav link hover effects and spacing */
         .main-sidebar .nav-sidebar .nav-item .nav-link {
-            border-radius: 12px;
-            margin: 4px 10px;
-            padding: 10px 15px;
+            border-radius: 12px !important;
+            margin: 4px 12px !important;
+            /* Slightly more room */
+            padding: 12px 18px !important;
             transition: all 0.3s ease;
-            color: #cbd5e1 !important;
+            color: rgba(255, 255, 255, 0.65) !important;
             display: flex !important;
             align-items: center !important;
+            border-left: 3px solid transparent !important;
+            font-weight: 500 !important;
+            width: auto !important;
+            /* Ensure it respects margins */
+            overflow: hidden !important;
+            /* Contain the glass effect */
         }
 
         .main-sidebar .nav-sidebar .nav-item .nav-link p {
             margin-bottom: 0 !important;
-            margin-left: 10px !important;
+            margin-left: 12px !important;
             line-height: 1 !important;
+            font-size: 0.95rem !important;
+            letter-spacing: 0.3px !important;
         }
 
         .main-sidebar .nav-sidebar .nav-item .nav-link:hover {
-            background: rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
             color: #ffffff !important;
-            transform: translateX(5px);
+            padding-left: 22px !important;
+            /* Subtle shift without clipping transform */
         }
 
         .main-sidebar .nav-sidebar .nav-item .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.15) !important;
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.25) 0%, rgba(99, 102, 241, 0.05) 100%) !important;
             color: #ffffff !important;
-            font-weight: 500;
+            border-left: 3px solid #6366f1 !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
         }
 
         .main-sidebar .nav-sidebar .nav-link.active .nav-icon {
-            color: #60a5fa !important;
+            color: #818cf8 !important; /* Vibrant indigo icon */
+            transform: scale(1.1);
         }
 
         .main-sidebar .nav-sidebar .nav-icon {
-            color: #94a3b8;
+            color: rgba(255, 255, 255, 0.45);
             width: 25px !important;
             text-align: center !important;
-            font-size: 1.1rem !important;
+            font-size: 1.15rem !important;
             margin-right: 0 !important;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar Headers (like ACCOUNT) */
+        .main-sidebar .nav-header {
+            background: transparent !important;
+            color: rgba(255, 255, 255, 0.35) !important;
+            font-size: 0.75rem !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1.5px !important;
+            padding: 20px 25px 10px !important;
         }
 
         /* Fix for sidebar-mini alignment */
@@ -83,6 +108,36 @@
             padding-right: 0 !important;
             margin-left: 5px !important;
             margin-right: 5px !important;
+        }
+
+        /* Center brand link and hide text in mini sidebar */
+        .sidebar-mini.sidebar-collapse .main-sidebar .brand-link {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar .brand-text,
+        .sidebar-mini.sidebar-collapse .main-sidebar .nav-sidebar .nav-link p {
+            display: none !important;
+        }
+
+        /* Prevent hover shift and hide ALL text in collapsed mode */
+        .sidebar-mini.sidebar-collapse .main-sidebar .nav-sidebar .nav-item .nav-link:hover {
+            padding-left: 0 !important;
+            width: 100% !important;
+        }
+        
+        .sidebar-mini.sidebar-collapse .main-sidebar .nav-link p,
+        .sidebar-mini.sidebar-collapse .main-sidebar .brand-text,
+        .sidebar-mini.sidebar-collapse .main-sidebar .nav-header,
+        .sidebar-mini.sidebar-collapse .main-sidebar .user-panel .info,
+        .sidebar-mini.sidebar-collapse .main-sidebar .nav-sidebar .nav-link span:not(.nav-icon) {
+            display: none !important;
+            opacity: 0 !important;
+            width: 0 !important;
+            visibility: hidden !important;
+            position: absolute !important;
         }
 
         /* Center user panel icon in mini sidebar */
@@ -117,16 +172,68 @@
 
         /* Adjust content transition to match rounded corners */
         @media (min-width: 768px) {
-
             body:not(.sidebar-collapse) .content-wrapper,
             body:not(.sidebar-collapse) .main-footer,
             body:not(.sidebar-collapse) .main-header {
                 margin-left: 260px;
-                /* Slight buffer for the curved edge */
             }
-
             .main-sidebar {
                 width: 250px;
+            }
+        }
+
+        /* --- Responsive Mobile Adjustments --- */
+        @media (max-width: 767.98px) {
+            .main-header .navbar-nav .nav-link span {
+                display: none; /* Hide 'Logout' text, keep icon */
+            }
+            .nav-pill-custom {
+                padding: 6px 10px !important;
+            }
+            .nav-pill-logout {
+                margin-left: 5px;
+            }
+            .content-header h1 {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+            .breadcrumb {
+                justify-content: center;
+                margin-top: 10px;
+            }
+            .card-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .card-tools {
+                margin-left: 0 !important;
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+            .card-tools .btn {
+                flex: 1;
+                min-width: 120px;
+                margin-left: 0 !important;
+            }
+            /* Force tables to be scrollable on mobile */
+            .table-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .main-header .navbar-nav .nav-link {
+                padding: 0.5rem 0.6rem;
+            }
+            .nav-pill-profile {
+                max-width: 130px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
         }
 
@@ -162,16 +269,49 @@
                 opacity: 0;
                 transform: scale(0.95) translateY(-10px);
             }
-
             to {
                 opacity: 1;
                 transform: scale(1) translateY(0);
             }
         }
+
+        .nav-pill-custom {
+            border-radius: 9999px !important;
+            padding: 6px 16px !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .nav-pill-profile {
+            background-color: #DBEAFE !important;
+            color: #1E40AF !important;
+        }
+
+        .nav-pill-profile:hover {
+            background-color: #BFDBFE !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-pill-logout {
+            background-color: #FEE2E2 !important;
+            color: #991B1B !important;
+            margin-left: 10px;
+        }
+
+        .nav-pill-logout:hover {
+            background-color: #FECACA !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.2);
+        }
     </style>
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini sidebar-no-expand layout-fixed">
     <div class="wrapper">
 
         <!-- Navbar -->
@@ -185,28 +325,32 @@
 
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
-                <!-- Logout Button (Quick Access) -->
-                <li class="nav-item" th:if="${session.loggedIn}">
-                    <a href="/logout" class="nav-link logout-link" 
-                        style="background-color: #FEE2E2; color: #DC2626; border-radius: 9999px; padding: 6px 14px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; margin-right: 10px; transition: all 0.2s;">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                </li>
+                <!-- Logout Button moved to dropdown only as requested -->
                 <!-- User Profile -->
                 <li class="nav-item dropdown" th:if="${session.loggedIn}">
-                    <a class="nav-link" data-toggle="dropdown" href="#"
-                        style="background-color: #DBEAFE; color: #1E40AF; border-radius: 9999px; padding: 6px 16px; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
+                    <a class="nav-link nav-pill-custom nav-pill-profile" data-toggle="dropdown" href="#" role="button">
                         <i class="far fa-user"></i>
-                        <span th:text="${user != null ? user.fullName : (session.fullName ?: (session.username ?: 'Admin'))}"></span>
+                        <span
+                            th:text="${user != null ? user.fullName : (session.fullName ?: (session.username ?: 'Admin'))}"></span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <div class="dropdown-header text-center">User Session</div>
+                        <div class="dropdown-header text-center font-weight-bold">Admin Account</div>
+                        <div class="dropdown-divider"></div>
+                        <a href="/admin-profile" class="dropdown-item">
+                            <i class="fas fa-user-circle mr-2 text-primary"></i> My Profile
+                        </a>
                         <div class="dropdown-divider"></div>
                         <a href="/logout" class="dropdown-item logout-link text-danger">
                             <i class="fas fa-sign-out-alt mr-2"></i> Logout
                         </a>
                     </div>
+                </li>
+                <!-- Logout Pill -->
+                <li class="nav-item" th:if="${session.loggedIn}">
+                    <a href="/logout" class="nav-link logout-link nav-pill-custom nav-pill-logout" role="button">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
                 </li>
             </ul>
         </nav>
@@ -215,27 +359,16 @@
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo - Non-clickable as requested -->
             <div class="brand-link"
-                style="display: flex; align-items: center; padding: 0.8rem 1rem; cursor: default; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                style="display: flex; align-items: center; justify-content: flex-start; padding: 0.8rem 2.5rem !important; width: 100% !important; cursor: default; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <i class="fas fa-ticket-alt"
-                    style="font-size: 1.5rem; color: #3B82F6; margin-right: 0.5rem; filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5));"></i>
+                    style="font-size: 1.5rem; color: #3B82F6; margin-right: 8px; filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5));"></i>
                 <span class="brand-text"
-                    style="font-weight: 700; font-size: 1.25rem; color: #ffffff; letter-spacing: 0.5px;">HallMeet</span>
+                    style="font-weight: 700; font-size: 1.25rem; color: #ffffff; letter-spacing: 0.5px; margin: 0;">HallMeet</span>
             </div>
 
             <!-- Sidebar -->
             <div class="sidebar">
-                <!-- Sidebar user panel -->
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center" th:if="${session.loggedIn}"
-                    style="overflow: visible;">
-                    <div class="image" style="padding-left: 0.8rem; display: flex; align-items: center;">
-                        <i class="fas fa-user-circle fa-2x text-white"
-                            style="line-height: 1; vertical-align: middle;"></i>
-                    </div>
-                    <div class="info" style="padding-left: 10px;">
-                        <a href="#" class="d-block" style="color: #ffffff; font-weight: 500; font-size: 0.95rem;"
-                            th:text="${user != null ? user.fullName : (session.fullName ?: (session.username ?: 'Admin'))}"></a>
-                    </div>
-                </div>
+                <!-- Sidebar user panel removed as requested -->
 
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
@@ -257,19 +390,21 @@
                             </a>
                         </li>
 
-                        <!-- Colleges -->
-                        <li class="nav-item">
-                            <a href="/collegeList-form" class="nav-link">
-                                <i class="nav-icon fas fa-university"></i>
-                                <p>Institutes</p>
-                            </a>
-                        </li>
+
 
                         <!-- Syllabus -->
                         <li class="nav-item">
                             <a href="/Subject-form" class="nav-link">
                                 <i class="nav-icon fas fa-book"></i>
                                 <p>Syllabus</p>
+                            </a>
+                        </li>
+
+                        <!-- Courses -->
+                        <li class="nav-item">
+                            <a href="/course-form" class="nav-link">
+                                <i class="nav-icon fas fa-graduation-cap"></i>
+                                <p>Courses</p>
                             </a>
                         </li>
 
@@ -281,21 +416,39 @@
                             </a>
                         </li>
 
-                        <!-- Hall Tickets -->
+                        <!-- Create Hall Ticket (Requests) -->
                         <li class="nav-item">
-                            <a href="/hall-form" class="nav-link">
+                            <a href="/requested-halltickets" class="nav-link">
                                 <i class="nav-icon fas fa-ticket-alt"></i>
-                                <p>Hall Tickets</p>
+                                <p>Create Hall Ticket</p>
+                            </a>
+                        </li>
+
+                        <!-- Issued Hall Tickets -->
+                        <li class="nav-item">
+                            <a href="/issued-halltickets" class="nav-link">
+                                <i class="nav-icon fas fa-check-circle"></i>
+                                <p>Issued Hall Tickets</p>
                             </a>
                         </li>
 
                         <!-- Divider -->
                         <li class="nav-header">ACCOUNT</li>
+
+                        <!-- Manage Admins -->
                         <li class="nav-item">
-                            <a href="/logout" class="nav-link logout-link"
-                                style="background: rgba(239, 68, 68, 0.15); color: #f87171 !important; margin-top: 10px; border: 1px solid rgba(239, 68, 68, 0.2);">
-                                <i class="nav-icon fas fa-sign-out-alt" style="color: #f87171;"></i>
-                                <p style="font-weight: 600;">Logout</p>
+                            <a href="/manage-admins" class="nav-link">
+                                <i class="nav-icon fas fa-user-shield"></i>
+                                <p>Admins</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/admin-profile" class="nav-link">
+                                <i class="nav-icon fas fa-user-circle"></i>
+                                <p
+                                    th:text="${user != null ? user.fullName : (session.fullName ?: (session.username ?: 'Admin'))}">
+                                </p>
                             </a>
                         </li>
                     </ul>
@@ -392,6 +545,19 @@
                     } else {
                         // Show a quick "alert of resubmission" as requested by user
                         alert("Logout verified. Processing session termination...");
+                    }
+                });
+            });
+
+            // Universal handler to open date/time picker when clicking anywhere on the input
+            document.querySelectorAll('input[type="date"], input[type="time"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    if (typeof this.showPicker === 'function') {
+                        try {
+                            this.showPicker();
+                        } catch (e) {
+                            console.log("showPicker failed, falling back to native trigger");
+                        }
                     }
                 });
             });

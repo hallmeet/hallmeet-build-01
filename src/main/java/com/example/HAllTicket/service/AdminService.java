@@ -12,4 +12,8 @@ public interface AdminService {
 	String getRoleByEmail(String email);
 	AdminModel getUserByEmail(String email);
 	AdminModel get3(String email);
+	void save(AdminModel admin);
+    java.util.List<AdminModel> listAll();
+    AdminModel get(int id);
+    void delete(int id);
 }

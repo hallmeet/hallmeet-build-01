@@ -8,7 +8,7 @@
 		<version>3.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.SaurabhBorkar</groupId>
+	<groupId>com.swapnil</groupId>
 	<artifactId>Hall_Ticket</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Hall_Ticket</name>

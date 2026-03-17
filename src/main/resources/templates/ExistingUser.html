@@ -7,46 +7,33 @@
 <body>
     <section th:fragment="content">
         <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-user-edit mr-2"></i>Update Student Details
+            <div class="card-header bg-gradient-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-user-edit mr-2"></i>Edit Your Profile
                 </h3>
             </div>
             <div class="card-body">
-                <div th:if="${session.msg}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle mr-1"></i>
-                    <span th:text="${session.msg}"></span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
                 
                 <form method="post" th:action="${'/update-student/' + user.id}" enctype="multipart/form-data" id="updateForm">
                     <input type="hidden" name="formToken" th:value="${formToken}">
                     <input type="hidden" th:value="${user.id}" name="id">
-                    <input type="hidden" th:value="${user.email}" name="email">
-                    <input type="hidden" th:value="${user.fullName}" name="fullName">
-                    <input type="hidden" th:value="${user.mobileNo}" name="mobileNo">
-                    <input type="hidden" th:value="${user.DateOfBirth}" name="DateOfBirth">
-                    <input type="hidden" th:value="${user.instituteName}" name="instituteName">
-                    <input type="hidden" th:value="${user.Course}" name="Course">
                     <input type="hidden" th:value="${user.email}" name="username">
                     
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>
-                                    <i class="fas fa-user mr-1"></i>Full Name
+                                <label for="fullName">
+                                    <i class="fas fa-user mr-1"></i>Full Name <span class="text-danger">*</span>
                                 </label>
-                                <div class="form-control bg-light" th:text="${user.fullName}"></div>
+                                <input type="text" name="fullName" id="fullName" class="form-control" th:value="${user.fullName}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>
-                                    <i class="fas fa-envelope mr-1"></i>Email
+                                <label for="email">
+                                    <i class="fas fa-envelope mr-1"></i>Email (Read-only)
                                 </label>
-                                <div class="form-control bg-light" th:text="${user.email}"></div>
+                                <input type="email" name="email" id="email" class="form-control bg-light" th:value="${user.email}" readonly>
                             </div>
                         </div>
                     </div>
@@ -54,43 +41,51 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>
-                                    <i class="fas fa-phone mr-1"></i>Mobile Number
+                                <label for="mobileNo">
+                                    <i class="fas fa-phone mr-1"></i>Mobile Number <span class="text-danger">*</span>
                                 </label>
-                                <div class="form-control bg-light" th:text="${user.mobileNo}"></div>
+                                <input type="tel" name="mobileNo" id="mobileNo" class="form-control" th:value="${user.mobileNo}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>
-                                    <i class="fas fa-calendar-alt mr-1"></i>Date of Birth
+                                <label for="DateOfBirth">
+                                    <i class="fas fa-calendar-alt mr-1"></i>Date of Birth <span class="text-danger">*</span>
                                 </label>
-                                <div class="form-control bg-light" th:text="${user.DateOfBirth}"></div>
+                                <input type="date" name="DateOfBirth" id="DateOfBirth" class="form-control" th:value="${user.DateOfBirth}" required>
                             </div>
                         </div>
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <div class="form-group">
-                                <label>
-                                    <i class="fas fa-university mr-1"></i>Institute Name
+                                <label for="instituteName">
+                                    <i class="fas fa-university mr-1"></i>Institute Name <span class="text-danger">*</span>
                                 </label>
-                                <div class="form-control bg-light" th:text="${user.instituteName}"></div>
+                                <input type="text" name="instituteName" id="instituteName" class="form-control" th:value="${user.instituteName}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="Course">
+                                    <i class="fas fa-graduation-cap mr-1"></i>Course <span class="text-danger">*</span>
+                                    <small class="text-muted ml-2" th:if="${courseList != null}" th:text="'(' + ${courseList.size()} + ' DB matches)'"></small>
+                                </label>
+                                <select name="Course" id="Course" class="form-control" required>
+                                    <option value="">Select Course</option>
+                                    <option th:each="course : ${courseList}" 
+                                            th:value="${course.courseName}" 
+                                            th:text="${course.courseName}"
+                                            th:selected="${user.Course == course.courseName}">
+                                    </option>
+                                </select>
                             </div>
                         </div>
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>
-                                    <i class="fas fa-graduation-cap mr-1"></i>Course
-                                </label>
-                                <div class="form-control bg-light" th:text="${user.Course}"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="admissionYear">
                                     <i class="fas fa-calendar-check mr-1"></i>Admission Year <span class="text-danger">*</span>
@@ -102,7 +97,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="semister">
                                     <i class="fas fa-book mr-1"></i>Semester <span class="text-danger">*</span>
@@ -125,14 +120,19 @@
                                 <label>
                                     <i class="fas fa-image mr-1"></i>Current Profile Image
                                 </label>
-                                <div th:if="${user.imageName != null and !user.imageName.isEmpty()}">
-                                    <img th:src="@{'/img/' + ${user.imageName}}" 
-                                         alt="Profile Image" 
-                                         class="img-thumbnail" 
-                                         style="max-width: 200px; max-height: 200px;">
-                                </div>
-                                <div th:if="${user.imageName == null or user.imageName.isEmpty()}" class="text-muted">
-                                    No image uploaded
+                                <div class="mt-2 text-center p-3 border rounded shadow-sm bg-light">
+                                    <div th:if="${user.imageName != null and !user.imageName.isEmpty()}">
+                                        <img th:src="@{'/img/' + ${user.imageName}}" 
+                                             alt="Profile Image" 
+                                             class="img-fluid rounded-circle" 
+                                             style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    </div>
+                                    <div th:if="${user.imageName == null or user.imageName.isEmpty()}">
+                                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" 
+                                             style="width: 120px; height: 120px;">
+                                            <i class="fas fa-user fa-3x text-white"></i>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -150,19 +150,26 @@
                         </div>
                     </div>
                     
-                    <div class="form-group mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                            <i class="fas fa-save mr-1"></i>Update Details
-                        </button>
-                        <a th:href="@{'/UserHomePage?username=' + ${user.email} + '#profile-section'}" class="btn btn-secondary btn-lg ml-2">
-                            <i class="fas fa-arrow-left mr-1"></i>Back to Home
+                    <div class="form-group mt-4 text-right">
+                        <a th:href="@{'/UserHomePage?username=' + ${user.email} + '#profile-section'}" class="btn btn-outline-secondary btn-lg mr-2">
+                            <i class="fas fa-times mr-1"></i>Cancel
                         </a>
+                        <button type="submit" class="btn btn-primary btn-lg px-5 shadow" id="submitBtn">
+                            <i class="fas fa-check-circle mr-1"></i>Save profile
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
         
         <script th:inline="none">
+            // Highlight sidebar item
+            const navEdit = document.getElementById('nav-profile-edit');
+            if (navEdit) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                navEdit.classList.add('active');
+            }
+
             // Update file input label
             document.getElementById('profileImage').addEventListener('change', function(e) {
                 var fileName = e.target.files[0] ? e.target.files[0].name : 'Choose new image';

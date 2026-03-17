@@ -22,4 +22,6 @@ public interface HallTicketService {
 	 * Returns true if the student already has a pending request for this exam.
 	 */
 	boolean hasPendingRequest(String email, String examName);
+
+	List<String> findAllocatedSeatsByExamName(String examName);
 }

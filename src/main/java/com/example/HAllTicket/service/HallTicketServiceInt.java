@@ -52,4 +52,9 @@ public class HallTicketServiceInt implements HallTicketService{
 		if (email == null || examName == null) return false;
 		return hallTicketRepo.existsByEmailAndExamNameAndStatus(email, examName, "Pending");
 	}
+
+	@Override
+	public List<String> findAllocatedSeatsByExamName(String examName) {
+		return hallTicketRepo.findAllocatedSeatsByExamName(examName);
+	}
 }

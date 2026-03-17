@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-base::layout(~{::section})}">
+<head>
+    <meta charset="utf-8">
+    <title>Manage Courses</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <div class="row">
+            <!-- Add New Course Form -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-plus-circle mr-2"></i>Add New Course
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/save-course}" th:object="${newCourse}" method="post">
+                            <input type="hidden" name="formToken" th:value="${formToken}">
+                            <div class="form-group">
+                                <label for="courseName">Course Name <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{courseName}" class="form-control" id="courseName" 
+                                       placeholder="e.g. MCA, B.TECH" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Description (Optional)</label>
+                                <textarea th:field="*{description}" class="form-control" id="description" 
+                                          placeholder="Enter course description" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save mr-2"></i>Save Course
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses List Table -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-graduation-cap mr-2"></i>Existing Courses
+                        </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-wrap">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th style="width: 80px;">ID</th>
+                                        <th>Course Name</th>
+                                        <th>Description</th>
+                                        <th style="width: 120px;" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="course : ${courses}">
+                                        <td th:text="${course.id}"></td>
+                                        <td>
+                                            <span class="badge badge-primary px-3 py-2" style="border-radius: 12px; font-size: 0.9rem;" th:text="${course.courseName}"></span>
+                                        </td>
+                                        <td th:text="${course.description ?: 'No description'}"></td>
+                                        <td class="text-center">
+                                            <a th:href="@{'/delete-course/' + ${course.id}}" 
+                                               class="btn btn-danger btn-sm"
+                                               onclick="return confirm('Are you sure you want to delete this course?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(courses)}">
+                                        <td colspan="4" class="text-center py-4 text-muted">
+                                            <i class="fas fa-info-circle mr-2"></i>No courses added yet.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

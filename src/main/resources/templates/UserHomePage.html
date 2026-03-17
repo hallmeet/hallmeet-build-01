@@ -1,20 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student-base::layout(~{::section})}">
+
 <head>
     <meta charset="utf-8">
     <title>Student Dashboard</title>
 </head>
+
 <body>
     <section th:fragment="content">
-        <!-- Flash messages -->
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle mr-2"></i><span th:text="${success}"></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}"></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
         <!-- Welcome Card (Dashboard) -->
         <div class="section-container" th:if="${user != null}" id="dashboard-section">
             <div class="row">
@@ -24,24 +17,25 @@
                             <div class="row">
                                 <div class="col-md-2 text-center">
                                     <div th:if="${user.imageName != null and !user.imageName.isEmpty()}">
-                                        <img th:src="@{'/img/' + ${user.imageName}}" 
-                                             class="img-circle elevation-2" 
-                                             alt="User Image" 
-                                             style="width: 100px; height: 100px; border: 3px solid white;">
+                                        <img th:src="@{'/img/' + ${user.imageName}}" class="img-circle elevation-2"
+                                            alt="User Image"
+                                            style="width: 100px; height: 100px; border: 3px solid white;">
                                     </div>
                                     <div th:if="${user.imageName == null or user.imageName.isEmpty()}">
                                         <i class="fas fa-user-circle fa-5x text-white"></i>
                                     </div>
                                 </div>
                                 <div class="col-md-10">
-                                    <h3 class="mb-0">
-                                        <i class="fas fa-user mr-2"></i>
+                                    <h3 class="mb-0 text-white">
+                                        <i class="fas fa-user mr-2 text-white-50"></i>
                                         Welcome, <span th:text="${user.fullName}">Student</span>!
                                     </h3>
-                                    <p class="mb-0 mt-2">
-                                        <i class="fas fa-envelope mr-2"></i><span th:text="${user.email}"></span> | 
-                                        <i class="fas fa-graduation-cap mr-2"></i><span th:text="${user.Course}"></span> | 
-                                        <i class="fas fa-university mr-2"></i><span th:text="${user.instituteName}"></span>
+                                    <p class="mb-0 mt-2" style="color: rgba(255, 255, 255, 0.85); font-weight: 500;">
+                                        <i class="fas fa-envelope mr-2"></i><span th:text="${user.email}"></span> |
+                                        <i class="fas fa-graduation-cap mr-2"></i><span th:text="${user.Course}"></span>
+                                        |
+                                        <i class="fas fa-university mr-2"></i><span
+                                            th:text="${user.instituteName}"></span>
                                     </p>
                                 </div>
                             </div>
@@ -49,43 +43,46 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Dashboard Stats -->
             <div class="row mt-4">
                 <div class="col-lg-4 col-6">
                     <div class="small-box bg-info elevation-2">
-                        <div class="inner">
+                        <div class="inner text-white">
                             <h3 th:text="${approvedHall != null ? #lists.size(approvedHall) : 0}">0</h3>
-                            <p>Approved Tickets</p>
+                            <p class="font-weight-bold">Approved Tickets</p>
                         </div>
                         <div class="icon">
-                            <i class="fas fa-check-circle"></i>
+                            <i class="fas fa-check-circle text-white-50"></i>
                         </div>
-                        <a href="#hall-tickets-section" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="#hall-tickets-section" class="small-box-footer text-white">More info <i
+                                class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-4 col-6">
                     <div class="small-box bg-warning elevation-2">
-                        <div class="inner">
+                        <div class="inner text-dark">
                             <h3 th:text="${pendingHall != null ? #lists.size(pendingHall) : 0}">0</h3>
-                            <p>Pending Applications</p>
+                            <p class="font-weight-bold">Pending Applications</p>
                         </div>
                         <div class="icon">
-                            <i class="fas fa-clock"></i>
+                            <i class="fas fa-clock text-dark-50" style="opacity: 0.3;"></i>
                         </div>
-                        <a href="#hall-tickets-section" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="#hall-tickets-section" class="small-box-footer text-dark">More info <i
+                                class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-4 col-12">
                     <div class="small-box bg-success elevation-2">
-                        <div class="inner">
+                        <div class="inner text-white">
                             <h3>Apply</h3>
-                            <p>New Exam Application</p>
+                            <p class="font-weight-bold">New Exam Application</p>
                         </div>
                         <div class="icon">
-                            <i class="fas fa-edit"></i>
+                            <i class="fas fa-edit text-white-50"></i>
                         </div>
-                        <a href="#apply-exam-section" class="small-box-footer">Apply Now <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="#apply-exam-section" class="small-box-footer text-white">Apply Now <i
+                                class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -96,7 +93,8 @@
                 <div class="col-md-10 mx-auto">
                     <div class="card card-primary card-outline shadow-sm">
                         <div class="card-header">
-                            <h3 class="card-title font-weight-bold"><i class="fas fa-user-circle mr-2"></i>My Profile</h3>
+                            <h3 class="card-title font-weight-bold"><i class="fas fa-user-circle mr-2"></i>My Profile
+                            </h3>
                         </div>
                         <div class="card-body">
                             <div class="row align-items-center">
@@ -104,49 +102,88 @@
                                 <div class="col-md-4 text-center border-right">
                                     <div class="mb-3">
                                         <div th:if="${user.imageName != null and !user.imageName.isEmpty()}">
-                                            <img th:src="@{'/img/' + ${user.imageName}}" 
-                                                 class="img-circle elevation-2 shadow" 
-                                                 alt="Profile Photo" 
-                                                 style="width: 180px; height: 180px; border: 4px solid #007bff; object-fit: cover;">
+                                            <img th:src="@{'/img/' + ${user.imageName}}"
+                                                class="img-circle elevation-2 shadow" alt="Profile Photo"
+                                                style="width: 180px; height: 180px; border: 4px solid #007bff; object-fit: cover;">
                                         </div>
                                         <div th:if="${user.imageName == null or user.imageName.isEmpty()}">
                                             <i class="fas fa-user-circle fa-9x text-muted grayscale"></i>
                                         </div>
                                     </div>
-                                    <h4 class="font-weight-bold text-primary mb-0" th:text="${user.fullName}">Student Name</h4>
+                                    <h4 class="font-weight-bold text-primary mb-0" th:text="${user.fullName}">Student
+                                        Name</h4>
                                     <p class="text-muted mb-0">Student Profile</p>
                                 </div>
-                                
+
                                 <!-- Right side: Details -->
                                 <div class="col-md-8">
                                     <div class="profile-details pl-md-4">
-                                        <div class="list-group list-group-unbordered">
-                                            <div class="list-group-item d-flex justify-content-between align-items-center bg-light px-4 mb-2 rounded border-0 shadow-sm">
-                                                <span><i class="fas fa-envelope mr-3 text-primary"></i>Email</span>
-                                                <span class="font-weight-bold" th:text="${user.email}"></span>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <div class="p-3 bg-light rounded shadow-sm border-left border-primary">
+                                                    <small class="text-muted d-block mb-1"><i
+                                                            class="fas fa-envelope mr-1"></i> Email</small>
+                                                    <span class="font-weight-bold" th:text="${user.email}"></span>
+                                                </div>
                                             </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center bg-light px-4 mb-2 rounded border-0 shadow-sm">
-                                                <span><i class="fas fa-phone-alt mr-3 text-success"></i>Mobile</span>
-                                                <span class="font-weight-bold" th:text="${user.mobileNo}"></span>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="p-3 bg-light rounded shadow-sm border-left border-success">
+                                                    <small class="text-muted d-block mb-1"><i
+                                                            class="fas fa-phone-alt mr-1"></i> Mobile</small>
+                                                    <span class="font-weight-bold" th:text="${user.mobileNo}"></span>
+                                                </div>
                                             </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center bg-light px-4 mb-2 rounded border-0 shadow-sm">
-                                                <span><i class="fas fa-graduation-cap mr-3 text-info"></i>Course</span>
-                                                <span class="font-weight-bold" th:text="${user.Course}"></span>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="p-3 bg-light rounded shadow-sm border-left border-info">
+                                                    <small class="text-muted d-block mb-1"><i
+                                                            class="fas fa-calendar-alt mr-1"></i> Date of Birth</small>
+                                                    <span class="font-weight-bold"
+                                                        th:text="${user.DateOfBirth ?: 'Not set'}"></span>
+                                                </div>
                                             </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center bg-light px-4 mb-2 rounded border-0 shadow-sm">
-                                                <span><i class="fas fa-university mr-3 text-warning"></i>Institute</span>
-                                                <span class="font-weight-bold" th:text="${user.instituteName}"></span>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="p-3 bg-light rounded shadow-sm border-left border-warning">
+                                                    <small class="text-muted d-block mb-1"><i
+                                                            class="fas fa-graduation-cap mr-1"></i> Course</small>
+                                                    <span class="font-weight-bold"
+                                                        th:text="${user.Course ?: 'Not set'}"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 mb-3">
+                                                <div class="p-3 bg-light rounded shadow-sm border-left border-danger">
+                                                    <small class="text-muted d-block mb-1"><i
+                                                            class="fas fa-university mr-1"></i> Institute</small>
+                                                    <span class="font-weight-bold"
+                                                        th:text="${user.instituteName ?: 'Not set'}"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="p-3 bg-light rounded shadow-sm border-left border-purple"
+                                                    style="border-left-color: #6f42c1 !important;">
+                                                    <small class="text-muted d-block mb-1"><i
+                                                            class="fas fa-calendar-check mr-1"></i> Admission
+                                                        Year</small>
+                                                    <span class="font-weight-bold"
+                                                        th:text="${user.AdmissionForYear ?: 'Not set'}"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="p-3 bg-light rounded shadow-sm border-left border-teal"
+                                                    style="border-left-color: #20c997 !important;">
+                                                    <small class="text-muted d-block mb-1"><i
+                                                            class="fas fa-book mr-1"></i> Semester</small>
+                                                    <span class="font-weight-bold"
+                                                        th:text="${user.Semister ?: 'Not set'}"></span>
+                                                </div>
                                             </div>
                                         </div>
-                                        
-                                        <form method="post" th:action="@{/UpdateDetails}" class="mt-4">
-                                            <input type="hidden" name="formToken" th:value="${formToken}">
-                                            <input type="hidden" th:value="${user.id}" name="id">
-                                            <input type="hidden" th:value="${user.email}" name="username">
-                                            <button type="submit" class="btn btn-primary btn-block elevation-2">
+
+                                        <div class="mt-3">
+                                            <a th:href="@{'/ExistingUser?username=' + ${user.email}}"
+                                                class="btn btn-primary btn-block btn-lg shadow">
                                                 <i class="fas fa-user-edit mr-2"></i>Edit Profile Details
-                                            </button>
-                                        </form>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -167,23 +204,81 @@
                         <div class="card-body">
                             <form method="post" th:action="@{/examAp}" th:if="${user != null}">
                                 <input type="hidden" name="formToken" th:value="${formToken}">
+                                <style>
+                                    .exam-select-container {
+                                        position: relative;
+                                    }
+                                    .exam-select-container::after {
+                                        content: '\f078';
+                                        font-family: 'Font Awesome 6 Free';
+                                        font-weight: 900;
+                                        position: absolute;
+                                        right: 20px;
+                                        top: 50%;
+                                        transform: translateY(-50%);
+                                        color: #6366f1;
+                                        pointer-events: none;
+                                        transition: all 0.3s ease;
+                                        font-size: 0.9rem;
+                                    }
+                                    #exam.form-control {
+                                        appearance: none !important;
+                                        -webkit-appearance: none !important;
+                                        background-image: none !important;
+                                        padding: 0 25px !important;
+                                        padding-right: 55px !important;
+                                        height: 60px !important;
+                                        border: 2px solid #e2e8f0 !important;
+                                        border-radius: 18px !important;
+                                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+                                        font-weight: 600 !important;
+                                        color: #334155 !important;
+                                        background: #ffffff !important;
+                                        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+                                        font-size: 1.05rem !important;
+                                    }
+                                    #exam.form-control:focus {
+                                        border-color: #6366f1 !important;
+                                        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.2) !important;
+                                        transform: translateY(-3px);
+                                        outline: none !important;
+                                    }
+                                    .exam-select-container:focus-within::after {
+                                        color: #4f46e5;
+                                        transform: translateY(-50%) rotate(180deg);
+                                    }
+                                    #exam option {
+                                        padding: 20px !important;
+                                        font-weight: 500;
+                                        background: #ffffff !important;
+                                        color: #334155 !important;
+                                    }
+                                    #exam option:disabled {
+                                        background: #f1f5f9 !important;
+                                        color: #94a3b8 !important;
+                                    }
+                                </style>
                                 <div class="form-group">
-                                    <label>Select Exam</label>
-                                    <select name="ExamName" id="exam" class="form-control" required>
-                                        <option value="">-- Select Exam --</option>
-                                        <option th:each="exam : ${listexam}" 
-                                                th:value="${exam?.examName ?: ''}" 
+                                    <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 mb-2">
+                                        <i class="fas fa-graduation-cap mr-1"></i> Select Exam
+                                    </label>
+                                    <div class="exam-select-container">
+                                        <select name="ExamName" id="exam" class="form-control" required>
+                                            <option value="">-- Select Exam --</option>
+                                            <option th:each="exam : ${listexam}" th:value="${exam?.examName ?: ''}"
                                                 th:text="${(appliedExamNames != null and appliedExamNames.contains(exam?.examName)) ? (exam?.examName + ' (already applied)') : (exam?.examName ?: 'N/A')}"
-                                                th:disabled="${appliedExamNames != null and appliedExamNames.contains(exam?.examName)}"></option>
-                                    </select>
+                                                th:disabled="${appliedExamNames != null and appliedExamNames.contains(exam?.examName)}">
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
-                                
+
                                 <input type="hidden" th:value="${user.email}" name="username">
                                 <input type="hidden" th:value="${user.email}" name="email">
                                 <input type="hidden" th:value="${user.fullName}" name="StudentName">
                                 <input type="hidden" name="Status" value="Pending">
                                 <input type="hidden" th:value="${user.instituteName}" name="instituteName">
-                                
+
                                 <button type="submit" class="btn btn-success btn-block">
                                     <i class="fas fa-paper-plane mr-2"></i>Apply For Exam
                                 </button>
@@ -194,136 +289,104 @@
             </div>
         </div>
 
-        <!-- My Hall Tickets Section -->
-        <div class="section-container" id="hall-tickets-section" style="display: none;">
+        <!-- Approved Requests Section -->
+        <div class="section-container" id="approved-requests-section" style="display: none;">
             <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-ticket-alt mr-2"></i>My Hall Tickets</h3>
-                        <div class="card-tools">
-                            <a th:if="${user != null}" th:href="@{'/UserHomePage?username=' + ${user.email} + '#hall-tickets-section'}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-sync-alt mr-1"></i>Refresh
-                            </a>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-check-circle mr-2"></i>Approved Requests</h3>
+                            <div class="card-tools">
+                                <a th:if="${user != null}"
+                                    th:href="@{'/UserHomePage?username=' + ${user.email} + '#approved-requests-section'}"
+                                    class="btn btn-sm btn-primary">
+                                    <i class="fas fa-sync-alt mr-1"></i>Refresh
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="card-body">
-                        <div th:if="${hall == null or hall.isEmpty()}" class="alert alert-info">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            <strong>No hall tickets found.</strong> Please apply for an exam first.
-                        </div>
+                        <div class="card-body">
+                            <div th:if="${approvedHall == null or approvedHall.isEmpty()}" class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>No approved requests found.</strong> Your approved exam applications will appear here.
+                            </div>
 
-                        <div th:if="${hall != null and !hall.isEmpty()}">
-                            <!-- Tabs: Approved Tickets | Pending Applications -->
-                            <ul class="nav nav-tabs mb-3" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" data-toggle="tab" href="#approvedTickets" role="tab">
-                                        <i class="fas fa-check-circle mr-1"></i>Approved Tickets
-                                        <span class="badge badge-success ml-1" th:text="${approvedHall != null ? #lists.size(approvedHall) : 0}">0</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#pendingApplications" role="tab">
-                                        <i class="fas fa-clock mr-1"></i>Pending Applications
-                                        <span class="badge badge-warning ml-1" th:text="${pendingHall != null ? #lists.size(pendingHall) : 0}">0</span>
-                                    </a>
-                                </li>
-                            </ul>
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="approvedTickets" role="tabpanel">
-                                    <div class="row" th:each="hl : ${approvedHall}">
-                                        <div class="col-12 mb-4">
-                                            <div class="card card-outline card-success shadow-sm">
-                                                <div class="card-header bg-light">
-                                                    <h5 class="card-title font-weight-bold mb-0">
-                                                        <i class="fas fa-ticket-alt mr-2 text-success"></i>
-                                                        <span th:text="${hl.ExamName ?: 'Hall Ticket'}"></span>
-                                                    </h5>
-                                                    <div class="card-tools">
-                                                        <span class="badge badge-success px-3 py-2" th:text="${hl.Status}"></span>
-                                                    </div>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="row align-items-center">
-                                                        <!-- Left side: Details -->
-                                                        <div class="col-md-7 border-right">
-                                                            <div class="hall-ticket-details pr-md-4">
-                                                                <div class="row mb-3">
-                                                                    <div class="col-sm-4 text-muted font-weight-bold">Student Name:</div>
-                                                                    <div class="col-sm-8 font-weight-bold" th:text="${hl.StudentName ?: 'N/A'}"></div>
-                                                                </div>
-                                                                <div class="row mb-3" th:if="${hl.SeatNo != null}">
-                                                                    <div class="col-sm-4 text-muted font-weight-bold">Seat Number:</div>
-                                                                    <div class="col-sm-8 text-primary font-weight-bold" th:text="${hl.SeatNo}"></div>
-                                                                </div>
-                                                                <div class="row mb-3">
-                                                                    <div class="col-sm-4 text-muted font-weight-bold">Institute:</div>
-                                                                    <div class="col-sm-8" th:text="${hl.instituteName ?: 'N/A'}"></div>
-                                                                </div>
-                                                                <div class="row mb-0">
-                                                                    <div class="col-sm-4 text-muted font-weight-bold">Exam Name:</div>
-                                                                    <div class="col-sm-8 text-info font-weight-bold" th:text="${hl.ExamName ?: 'N/A'}"></div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <!-- Right side: QR & Actions -->
-                                                        <div class="col-md-5 text-center mt-3 mt-md-0">
-                                                            <div th:if="${hl.qrName != null and !hl.qrName.isEmpty()}" class="mb-3">
-                                                                <img th:src="@{'/qr/' + ${hl.qrName}}" alt="QR Code" 
-                                                                     class="img-fluid p-2 bg-white" 
-                                                                     style="max-width: 140px; border: 1px solid #dee2e6; border-radius: 8px;"
-                                                                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'140\' height=\'140\'%3E%3Crect fill=\'%23f8f9fa\' width=\'140\' height=\'140\'/%3E%3Ctext fill=\'%23adb5bd\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\'%3EQR N/A%3C/text%3E%3C/svg%3E';">
-                                                                <p class="text-muted small mt-1 mb-0"><i class="fas fa-qrcode mr-1"></i>Scan for Verification</p>
-                                                            </div>
-                                                            <div class="d-flex flex-column gap-2 px-md-4">
-                                                                <a class="btn btn-outline-info btn-block mb-2" th:href="@{'/hall-ticket/view/' + ${hl.id}}" target="_blank">
-                                                                    <i class="fas fa-eye mr-2"></i> View Ticket
-                                                                </a>
-                                                                <a class="btn btn-primary btn-block" th:href="@{'/hall-ticket/download/' + ${hl.id}}">
-                                                                    <i class="fas fa-file-pdf mr-2"></i> Download PDF
-                                                                </a>
-                                                            </div>
+                            <div th:if="${approvedHall != null and !approvedHall.isEmpty()}">
+                                <div>
+                                    <div>
+                                        <div class="row" th:each="hl : ${approvedHall}">
+                                            <div class="col-12 mb-4">
+                                                <div class="card card-outline card-success shadow-sm">
+                                                    <div class="card-header bg-light">
+                                                        <h5 class="card-title font-weight-bold mb-0">
+                                                            <i class="fas fa-ticket-alt mr-2 text-success"></i>
+                                                            <span th:text="${hl.ExamName ?: 'Hall Ticket'}"></span>
+                                                        </h5>
+                                                        <div class="card-tools">
+                                                            <span class="badge badge-success px-3 py-2"
+                                                                th:text="${hl.Status}"></span>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="pendingApplications" role="tabpanel">
-                                    <div class="row" th:if="${pendingHall == null or pendingHall.isEmpty()}">
-                                        <div class="col-12"><p class="text-muted">No pending applications.</p></div>
-                                    </div>
-                                    <div class="row" th:each="hl : ${pendingHall}">
-                                        <div class="col-12 mb-4">
-                                            <div class="card card-outline card-warning shadow-sm">
-                                                <div class="card-header bg-light">
-                                                    <h5 class="card-title font-weight-bold mb-0">
-                                                        <i class="fas fa-clock mr-2 text-warning"></i>
-                                                        <span th:text="${hl.ExamName ?: 'Hall Ticket'}"></span>
-                                                    </h5>
-                                                    <div class="card-tools">
-                                                        <span class="badge badge-warning px-3 py-2 text-dark" th:text="${hl.Status ?: 'Pending'}"></span>
-                                                    </div>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="row align-items-center">
-                                                        <div class="col-md-8 border-right">
-                                                            <div class="hall-ticket-details">
-                                                                <p class="mb-2 text-muted"><i class="fas fa-info-circle mr-2"></i>Application is under review. You can download the ticket once approved.</p>
-                                                                <div class="row">
-                                                                    <div class="col-sm-4 text-muted font-weight-bold">Exam Applied:</div>
-                                                                    <div class="col-sm-8 font-weight-bold" th:text="${hl.ExamName ?: 'N/A'}"></div>
+                                                    <div class="card-body">
+                                                        <div class="row align-items-center">
+                                                            <!-- Left side: Details -->
+                                                            <div class="col-md-7 border-right">
+                                                                <div class="hall-ticket-details pr-md-4">
+                                                                    <div class="row mb-3">
+                                                                        <div
+                                                                            class="col-sm-4 text-muted font-weight-bold">
+                                                                            Student Name:</div>
+                                                                        <div class="col-sm-8 font-weight-bold"
+                                                                            th:text="${hl.StudentName ?: 'N/A'}"></div>
+                                                                    </div>
+                                                                    <div class="row mb-3" th:if="${hl.SeatNo != null}">
+                                                                        <div
+                                                                            class="col-sm-4 text-muted font-weight-bold">
+                                                                            Seat Number:</div>
+                                                                        <div class="col-sm-8 text-primary font-weight-bold"
+                                                                            th:text="${hl.SeatNo}"></div>
+                                                                    </div>
+                                                                    <div class="row mb-3">
+                                                                        <div
+                                                                            class="col-sm-4 text-muted font-weight-bold">
+                                                                            Institute:</div>
+                                                                        <div class="col-sm-8"
+                                                                            th:text="${hl.instituteName ?: 'N/A'}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row mb-0">
+                                                                        <div
+                                                                            class="col-sm-4 text-muted font-weight-bold">
+                                                                            Exam Name:</div>
+                                                                        <div class="col-sm-8 text-info font-weight-bold"
+                                                                            th:text="${hl.ExamName ?: 'N/A'}"></div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-md-4 text-center mt-3 mt-md-0">
-                                                            <form method="post" th:action="@{/cancel-request/{id}(id=${hl.id})}" onsubmit="return confirm('Cancel this application?');">
-                                                                <input type="hidden" name="username" th:value="${user.email}">
-                                                                <button type="submit" class="btn btn-outline-danger px-4">
-                                                                    <i class="fas fa-times mr-2"></i>Cancel Request
-                                                                </button>
-                                                            </form>
+                                                            <!-- Right side: QR & Actions -->
+                                                            <div class="col-md-5 text-center mt-3 mt-md-0">
+                                                                <div th:if="${hl.qrName != null and !hl.qrName.isEmpty()}"
+                                                                    class="mb-3">
+                                                                    <img th:src="@{'/qr/' + ${hl.qrName}}" alt="QR Code"
+                                                                        class="img-fluid p-2 bg-white"
+                                                                        style="max-width: 140px; border: 1px solid #dee2e6; border-radius: 8px;"
+                                                                        onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'140\' height=\'140\'%3E%3Crect fill=\'%23f8f9fa\' width=\'140\' height=\'140\'/%3E%3Ctext fill=\'%23adb5bd\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\'%3EQR N/A%3C/text%3E%3C/svg%3E';">
+                                                                    <p class="text-muted small mt-1 mb-0"><i
+                                                                            class="fas fa-qrcode mr-1"></i>Scan for
+                                                                        Verification</p>
+                                                                </div>
+                                                                <div class="d-flex flex-column gap-2 px-md-4">
+                                                                    <a class="btn btn-outline-info btn-block mb-2"
+                                                                        th:href="@{'/hall-ticket/view/' + ${hl.id}}"
+                                                                        target="_blank">
+                                                                        <i class="fas fa-eye mr-2"></i> View Ticket
+                                                                    </a>
+                                                                    <a class="btn btn-primary btn-block"
+                                                                        th:href="@{'/hall-ticket/download/' + ${hl.id}}">
+                                                                        <i class="fas fa-file-pdf mr-2"></i> Download
+                                                                        PDF
+                                                                    </a>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -337,62 +400,149 @@
                 </div>
             </div>
         </div>
-        
+
+        <!-- Pending Applications Section -->
+        <div class="section-container" id="pending-applications-section" style="display: none;">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-clock mr-2"></i>Pending Applications</h3>
+                            <div class="card-tools">
+                                <a th:if="${user != null}"
+                                    th:href="@{'/UserHomePage?username=' + ${user.email} + '#pending-applications-section'}"
+                                    class="btn btn-sm btn-primary">
+                                    <i class="fas fa-sync-alt mr-1"></i>Refresh
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${pendingHall == null or pendingHall.isEmpty()}" class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>No pending applications.</strong> You do not currently have any pending exam applications.
+                            </div>
+
+                            <div th:if="${pendingHall != null and !pendingHall.isEmpty()}">
+                                <div>
+                                    <div>
+                                        <div class="row" th:if="${pendingHall == null or pendingHall.isEmpty()}">
+                                            <div class="col-12">
+                                                <p class="text-muted">No pending applications.</p>
+                                            </div>
+                                        </div>
+                                        <div class="row" th:each="hl : ${pendingHall}">
+                                            <div class="col-12 mb-4">
+                                                <div class="card card-outline card-warning shadow-sm">
+                                                    <div class="card-header bg-light">
+                                                        <h5 class="card-title font-weight-bold mb-0">
+                                                            <i class="fas fa-clock mr-2 text-warning"></i>
+                                                            <span th:text="${hl.ExamName ?: 'Hall Ticket'}"></span>
+                                                        </h5>
+                                                        <div class="card-tools">
+                                                            <span class="badge badge-warning px-3 py-2 text-dark"
+                                                                th:text="${hl.Status ?: 'Pending'}"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-8 border-right">
+                                                                <div class="hall-ticket-details">
+                                                                    <p class="mb-2 text-muted"><i
+                                                                            class="fas fa-info-circle mr-2"></i>Application
+                                                                        is under review. You can download the ticket
+                                                                        once approved.</p>
+                                                                    <div class="row">
+                                                                        <div
+                                                                            class="col-sm-4 text-muted font-weight-bold">
+                                                                            Exam Applied:</div>
+                                                                        <div class="col-sm-8 font-weight-bold"
+                                                                            th:text="${hl.ExamName ?: 'N/A'}"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4 text-center mt-3 mt-md-0">
+                                                                <form method="post"
+                                                                    th:action="@{/cancel-request/{id}(id=${hl.id})}"
+                                                                    onsubmit="return confirm('Cancel this application?');">
+                                                                    <input type="hidden" name="username"
+                                                                        th:value="${user.email}">
+                                                                    <button type="submit"
+                                                                        class="btn btn-outline-danger px-4">
+                                                                        <i class="fas fa-times mr-2"></i>Cancel Request
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script>
-            function showSection(sectionId) {
-                // Hide all sections
-                localStorage.setItem('activeStudentSection', sectionId);
-                document.querySelectorAll('.section-container').forEach(section => {
-                    section.style.display = 'none';
-                });
-                
-                // Update Page Title
-                const pageTitle = document.querySelector('.content-header h1');
-                if (pageTitle) {
-                    if (sectionId === 'dashboard-section') pageTitle.innerText = 'Dashboard';
-                    else if (sectionId === 'apply-exam-section') pageTitle.innerText = 'Apply for Exam';
-                    else if (sectionId === 'hall-tickets-section') pageTitle.innerText = 'My Hall Tickets';
-                    else if (sectionId === 'profile-section') pageTitle.innerText = 'My Profile';
+                function showSection(sectionId) {
+                    // Hide all sections
+                    localStorage.setItem('activeStudentSection', sectionId);
+                    document.querySelectorAll('.section-container').forEach(section => {
+                        section.style.display = 'none';
+                    });
+
+                    // Update Page Title
+                    const pageTitle = document.querySelector('.content-header h1');
+                    if (pageTitle) {
+                        if (sectionId === 'dashboard-section') pageTitle.innerText = 'Dashboard';
+                        else if (sectionId === 'apply-exam-section') pageTitle.innerText = 'Apply for Exam';
+                        else if (sectionId === 'approved-requests-section') pageTitle.innerText = 'Approved Requests';
+                        else if (sectionId === 'pending-applications-section') pageTitle.innerText = 'Pending Applications';
+                        else if (sectionId === 'profile-section') pageTitle.innerText = '';
+                    }
+
+                    // Show requested section
+                    const target = document.getElementById(sectionId);
+                    if (target) {
+                        target.style.display = 'block';
+                    }
+
+                    // Update active state in sidebar
+                    document.querySelectorAll('.main-sidebar .nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        const href = link.getAttribute('href');
+                        if (href && (href === '#' + sectionId || href.endsWith('#' + sectionId))) {
+                            link.classList.add('active');
+                        }
+                    });
                 }
-                
-                // Show requested section
-                const target = document.getElementById(sectionId);
-                if (target) {
-                    target.style.display = 'block';
-                }
-                
-                // Update active state in sidebar
-                document.querySelectorAll('.main-sidebar .nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    const href = link.getAttribute('href');
-                    if (href && (href === '#' + sectionId || href.endsWith('#' + sectionId))) {
-                        link.classList.add('active');
+
+                // Handle initial load and browser back/forward
+                window.addEventListener('load', function () {
+                    const hash = window.location.hash.substring(1);
+                    const savedSection = localStorage.getItem('activeStudentSection');
+
+                    if (hash && document.getElementById(hash)) {
+                        showSection(hash);
+                    } else if (savedSection && document.getElementById(savedSection)) {
+                        showSection(savedSection);
+                    } else {
+                        showSection('dashboard-section');
                     }
                 });
-            }
 
-            // Handle initial load and browser back/forward
-            window.addEventListener('load', function() {
-                const hash = window.location.hash.substring(1);
-                const savedSection = localStorage.getItem('activeStudentSection');
-                
-                if (hash && document.getElementById(hash)) {
-                    showSection(hash);
-                } else if (savedSection && document.getElementById(savedSection)) {
-                    showSection(savedSection);
-                } else {
-                    showSection('dashboard-section');
-                }
-            });
-
-            // Listen for hash changes
-            window.addEventListener('hashchange', function() {
-                const hash = window.location.hash.substring(1);
-                if (hash && document.getElementById(hash)) {
-                    showSection(hash);
-                }
-            });
-        </script>
+                // Listen for hash changes
+                window.addEventListener('hashchange', function () {
+                    const hash = window.location.hash.substring(1);
+                    if (hash && document.getElementById(hash)) {
+                        showSection(hash);
+                    }
+                });
+            </script>
     </section>
 </body>
+
 </html>
