@@ -89,44 +89,15 @@
             $(document).ready(function() {
                 $('#hallTicketTable').DataTable({
                     "responsive": true,
-                    "lengthChange": true,
+                    "lengthChange": false,
                     "autoWidth": false,
-                    "pageLength": 10,
+                    "paging": false,
+                    "info": false,
                     "order": [[0, 'desc']],
-                    "dom": 'Bfrtip',
-                    "buttons": [
-                        {
-                            extend: 'copy',
-                            text: '<i class="fas fa-copy"></i> Copy',
-                            className: 'btn btn-sm btn-secondary'
-                        },
-                        {
-                            extend: 'csv',
-                            text: '<i class="fas fa-file-csv"></i> CSV',
-                            className: 'btn btn-sm btn-info'
-                        },
-                        {
-                            extend: 'excel',
-                            text: '<i class="fas fa-file-excel"></i> Excel',
-                            className: 'btn btn-sm btn-success'
-                        },
-                        {
-                            extend: 'pdf',
-                            text: '<i class="fas fa-file-pdf"></i> PDF',
-                            className: 'btn btn-sm btn-danger'
-                        },
-                        {
-                            extend: 'print',
-                            text: '<i class="fas fa-print"></i> Print',
-                            className: 'btn btn-sm btn-warning'
-                        }
-                    ],
+                    "dom": 'frt',
                     "language": {
                         "search": "Search:",
-                        "lengthMenu": "Show _MENU_ entries",
-                        "info": "Showing _START_ to _END_ of _TOTAL_ entries",
-                        "infoEmpty": "No entries to show",
-                        "infoFiltered": "(filtered from _MAX_ total entries)"
+                        "zeroRecords": "No matching requests found"
                     }
                 });
             });

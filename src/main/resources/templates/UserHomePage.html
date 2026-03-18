@@ -297,11 +297,11 @@
                         <div class="card-header">
                             <h3 class="card-title"><i class="fas fa-check-circle mr-2"></i>Approved Requests</h3>
                             <div class="card-tools">
-                                <a th:if="${user != null}"
-                                    th:href="@{'/UserHomePage?username=' + ${user.email} + '#approved-requests-section'}"
+                                <button th:if="${user != null}"
+                                    onclick="refreshSection('approved-requests-section')"
                                     class="btn btn-sm btn-primary">
                                     <i class="fas fa-sync-alt mr-1"></i>Refresh
-                                </a>
+                                </button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -409,11 +409,11 @@
                         <div class="card-header">
                             <h3 class="card-title"><i class="fas fa-clock mr-2"></i>Pending Applications</h3>
                             <div class="card-tools">
-                                <a th:if="${user != null}"
-                                    th:href="@{'/UserHomePage?username=' + ${user.email} + '#pending-applications-section'}"
+                                <button th:if="${user != null}"
+                                    onclick="refreshSection('pending-applications-section')"
                                     class="btn btn-sm btn-primary">
                                     <i class="fas fa-sync-alt mr-1"></i>Refresh
-                                </a>
+                                </button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -487,6 +487,12 @@
         </div>
 
         <script>
+                function refreshSection(sectionId) {
+                    // Store the section we want to return to, then reload
+                    localStorage.setItem('activeStudentSection', sectionId);
+                    window.location.reload();
+                }
+
                 function showSection(sectionId) {
                     // Hide all sections
                     localStorage.setItem('activeStudentSection', sectionId);
@@ -521,11 +527,14 @@
                 }
 
                 // Handle initial load and browser back/forward
+                // URL hash always takes priority over localStorage
                 window.addEventListener('load', function () {
                     const hash = window.location.hash.substring(1);
                     const savedSection = localStorage.getItem('activeStudentSection');
 
                     if (hash && document.getElementById(hash)) {
+                        // URL hash wins — clear hash from URL cleanly
+                        history.replaceState(null, '', window.location.pathname + window.location.search);
                         showSection(hash);
                     } else if (savedSection && document.getElementById(savedSection)) {
                         showSection(savedSection);

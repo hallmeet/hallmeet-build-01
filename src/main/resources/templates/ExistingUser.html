@@ -94,6 +94,7 @@
                                     <option th:value="1" th:selected="${user.AdmissionForYear == '1'}">1</option>
                                     <option th:value="2" th:selected="${user.AdmissionForYear == '2'}">2</option>
                                     <option th:value="3" th:selected="${user.AdmissionForYear == '3'}">3</option>
+                                    <option th:value="4" th:selected="${user.AdmissionForYear == '4'}">4</option>
                                 </select>
                             </div>
                         </div>
@@ -109,6 +110,8 @@
                                     <option th:value="4" th:selected="${user.Semister == '4'}">4</option>
                                     <option th:value="5" th:selected="${user.Semister == '5'}">5</option>
                                     <option th:value="6" th:selected="${user.Semister == '6'}">6</option>
+                                    <option th:value="7" th:selected="${user.Semister == '7'}">7</option>
+                                    <option th:value="8" th:selected="${user.Semister == '8'}">8</option>
                                 </select>
                             </div>
                         </div>
@@ -124,12 +127,11 @@
                                     <div th:if="${user.imageName != null and !user.imageName.isEmpty()}">
                                         <img th:src="@{'/img/' + ${user.imageName}}" 
                                              alt="Profile Image" 
-                                             class="img-fluid rounded-circle" 
-                                             style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                             style="width: 120px; height: 150px; object-fit: cover; border: 3px solid #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                                     </div>
                                     <div th:if="${user.imageName == null or user.imageName.isEmpty()}">
-                                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" 
-                                             style="width: 120px; height: 120px;">
+                                        <div class="bg-secondary d-flex align-items-center justify-content-center mx-auto" 
+                                             style="width: 120px; height: 150px; border-radius: 8px;">
                                             <i class="fas fa-user fa-3x text-white"></i>
                                         </div>
                                     </div>

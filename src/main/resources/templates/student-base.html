@@ -303,7 +303,6 @@
 
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <!-- Brand Logo -->
             <div class="brand-link"
                 style="display: flex; align-items: center; justify-content: flex-start; padding: 0.8rem 2.5rem !important; width: 100% !important; cursor: default; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <i class="fas fa-ticket-alt"
@@ -315,16 +314,16 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <!-- Sidebar user panel -->
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex" th:if="${user != null}">
-                    <div class="image" th:if="${user.imageName != null and !user.imageName.isEmpty()}">
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex" th:if="${user != null}" style="justify-content: center; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-right: 4rem;">
+                    <div class="image mr-2" th:if="${user.imageName != null and !user.imageName.isEmpty()}">
                         <img th:src="@{'/img/' + ${user.imageName}}" class="img-circle elevation-2" alt="User Image"
                             style="width: 2.1rem; height: 2.1rem;">
                     </div>
-                    <div class="image" th:if="${user.imageName == null or user.imageName.isEmpty()}">
+                    <div class="image mr-2" th:if="${user.imageName == null or user.imageName.isEmpty()}">
                         <i class="fas fa-user-circle fa-2x text-white"></i>
                     </div>
                     <div class="info">
-                        <a href="#" class="d-block" th:text="${user.fullName ?: 'Student'}"></a>
+                        <a href="#" class="d-block" th:text="${user.fullName ?: 'Student'}" style="color: #fff; font-weight: 500;"></a>
                     </div>
                 </div>
 
@@ -382,25 +381,6 @@
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
-            <!-- Content Header -->
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0" th:text="${pageTitle ?: 'Dashboard'}">Dashboard</h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right" th:if="${breadcrumbs}">
-                                <li class="breadcrumb-item" th:each="crumb, iterStat : ${breadcrumbs}"
-                                    th:classappend="${iterStat.last} ? 'active' : ''">
-                                    <a th:if="${!iterStat.last}" th:href="${crumb.url}" th:text="${crumb.name}"></a>
-                                    <span th:if="${iterStat.last}" th:text="${crumb.name}"></span>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">

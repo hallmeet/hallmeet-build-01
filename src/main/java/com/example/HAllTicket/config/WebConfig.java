@@ -9,27 +9,38 @@ import java.io.File;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    /**
+     * Returns the persistent uploads directory path.
+     * Lives at {project.dir}/uploads/ — OUTSIDE src/ and target/
+     * so Maven NEVER wipes it on rebuild or restart.
+     */
+    public static String getUploadsDir() {
+        String projectDir = System.getProperty("user.dir");
+        File uploadsDir = new File(projectDir + File.separator + "uploads");
+        if (!uploadsDir.exists()) {
+            uploadsDir.mkdirs();
+        }
+        return uploadsDir.getAbsolutePath() + File.separator;
+    }
+
     @Override
     public void addResourceHandlers(@org.springframework.lang.NonNull ResourceHandlerRegistry registry) {
-        // Handle images from static/img directory
+        String uploadsPath = "file:" + getUploadsDir();
+
+        // /img/** → uploads/img/ (persistent, survives restarts) + classpath fallback
         registry.addResourceHandler("/img/**")
                 .addResourceLocations(
+                    uploadsPath + "img" + File.separator,
                     "classpath:/static/img/",
-                    "file:./src/main/resources/static/img/",
-                    "file:" + System.getProperty("user.home") + File.separator + "HallTicket" + File.separator + "img" + File.separator
+                    "file:./src/main/resources/static/img/"
                 );
-        
-        // Handle QR codes from static/qr directory
-        String projectDir = System.getProperty("user.dir");
-        String qrPath = projectDir + File.separator + "src" + File.separator + "main" + 
-                       File.separator + "resources" + File.separator + "static" + File.separator + "qr" + File.separator;
-        
+
+        // /qr/** → uploads/qr/ (persistent, survives restarts) + classpath fallback
         registry.addResourceHandler("/qr/**")
                 .addResourceLocations(
+                    uploadsPath + "qr" + File.separator,
                     "classpath:/static/qr/",
-                    "file:" + qrPath,
-                    "file:" + System.getProperty("user.home") + File.separator + "HallTicket" + File.separator + "qr" + File.separator
+                    "file:./src/main/resources/static/qr/"
                 );
     }
 }
-

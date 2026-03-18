@@ -269,20 +269,29 @@ public class HallController {
             @RequestParam("newPassword") String newPassword,
             RedirectAttributes redirectAttributes) {
         try {
-            UserCredential user = userService.getUserByEmail(email);
+            String normalizedEmail = email.toLowerCase().trim();
+            UserCredential user = userService.getUserByEmail(normalizedEmail);
+            
             if (user == null) {
-                redirectAttributes.addFlashAttribute("error", "Student account (UserCredential) not found for email: " + email);
-                return "redirect:/StudentList_form";
+                logger.warn("UserCredential not found for existing student {}, creating brand new account.", normalizedEmail);
+                user = new UserCredential();
+                user.setEmail(normalizedEmail);
+                user.setRole("student"); // Assuming student role
+                // Get name from StudentModel if possible
+                StudentModel student = studentService.getUserByEmail(normalizedEmail);
+                if (student != null) {
+                    user.setFullName(student.getFullName());
+                }
             }
             
             // Set the new raw password; createUser service implementation will handle hashing
             user.setPassword(newPassword);
             userService.createUser(user);
             
-            logger.info("Admin changed password for student: {}", email);
-            redirectAttributes.addFlashAttribute("success", "Password updated successfully for " + email);
+            logger.info("Admin successfully changed/created password for student: {}", normalizedEmail);
+            redirectAttributes.addFlashAttribute("success", "Password updated successfully for " + normalizedEmail);
         } catch (Exception e) {
-            logger.error("Error changing student password: {}", e.getMessage());
+            logger.error("Error changing student password: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("error", "Failed to change password: " + e.getMessage());
         }
         return "redirect:/StudentList_form";
@@ -695,13 +704,8 @@ public class HallController {
             session.setAttribute("loggedIn", true);
             session.setAttribute("username", normalizedUsername);
             session.setAttribute("fullName", hallUser.getFullName());
-            StudentModel newStudent = new StudentModel();
-            newStudent.setEmail(hallUser.getEmail());
-            newStudent.setFullName(hallUser.getFullName());
-            newStudent.setMobileNo(hallUser.getMobileNo());
-            model.addAttribute("user", newStudent);
-            model.addAttribute("courseList", courseService.listAll());
-            return "userReDetailsPage";
+            // Redirect to the form page so a fresh formToken is generated properly
+            return "redirect:/userLoginPage_form";
         }
 
         // Authentication successful with complete profile
@@ -766,11 +770,20 @@ public class HallController {
 
     @GetMapping("/userLoginPage_form")
     public String userLoginPage(HttpSession session, Model model) {
-        model.addAttribute("formToken", FormTokenUtil.generateToken(session));
+        // Always generate a fresh token — this makes page refresh safe
+        String token = FormTokenUtil.generateToken(session);
+        model.addAttribute("formToken", token);
+
         String username = (String) session.getAttribute("username");
         if (username != null) {
             UserCredential cred = userService.getUserByEmail(username);
             if (cred != null) {
+                // Check if student profile is already complete — redirect to dashboard
+                StudentModel existing = studentService.getUserByEmail(username);
+                if (existing != null && existing.getInstituteName() != null && !existing.getInstituteName().isBlank()) {
+                    logger.info("Student profile already complete for: {}, redirecting to dashboard", username);
+                    return "redirect:/UserHomePage?username=" + username;
+                }
                 StudentModel newStudent = new StudentModel();
                 newStudent.setEmail(cred.getEmail());
                 newStudent.setFullName(cred.getFullName());
@@ -877,21 +890,14 @@ public class HallController {
                     String fileName = "profile_" + existingStudent.getId() + "_" + System.currentTimeMillis()
                             + extension;
 
-                    File imgDir;
-                    try {
-                        imgDir = new ClassPathResource("static/img").getFile();
-                    } catch (Exception e) {
-                        String projectDir = System.getProperty("user.dir");
-                        imgDir = new File(projectDir + File.separator + "src" + File.separator + "main" +
-                                File.separator + "resources" + File.separator + "static" + File.separator + "img");
-                    }
-
-                    if (!imgDir.exists())
-                        imgDir.mkdirs();
+                    // Use persistent uploads/img/ dir — NEVER wiped by Maven
+                    File imgDir = new File(com.example.HAllTicket.config.WebConfig.getUploadsDir() + "img");
+                    if (!imgDir.exists()) imgDir.mkdirs();
 
                     Path path = Paths.get(imgDir.getAbsolutePath() + File.separator + fileName);
                     Files.copy(img.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
                     existingStudent.setImageName(fileName);
+                    logger.info("Profile image saved to: {}", path);
                 } catch (Exception e) {
                     logger.error("Error saving profile image: {}", e.getMessage());
                 }
@@ -936,9 +942,11 @@ public class HallController {
         if (username != null) username = username.toLowerCase().trim();
         logger.info("Profile completion POST - username: {}, Institute: {}", username, user.getInstituteName());
 
+        // Token validation: if expired (e.g. page refresh), redirect back to form
+        // rather than showing a hard error — form will get a fresh token on reload.
         if (!FormTokenUtil.validateAndInvalidate(session, formToken)) {
-            logger.warn("Invalid form token for username: {}", username);
-            redirectAttributes.addFlashAttribute("error", "Invalid or expired form. Please try again.");
+            logger.warn("Form token expired for username: {} — redirecting back to profile form", username);
+            // Redirect back to profile form; a fresh token will be generated there
             return "redirect:/userLoginPage_form";
         }
 
@@ -947,6 +955,15 @@ public class HallController {
                 user.setEmail(username);
             }
 
+            // Idempotency: if student profile already complete, just redirect to dashboard
+            StudentModel alreadyExists = studentService.getUserByEmail(username);
+            if (alreadyExists != null && alreadyExists.getInstituteName() != null
+                    && !alreadyExists.getInstituteName().isBlank()) {
+                logger.info("Student profile already exists for: {}, redirecting to dashboard", username);
+                session.setAttribute("username", username);
+                session.setAttribute("loggedIn", true);
+                return "redirect:/UserHomePage?username=" + username;
+            }
             // Double check DOB
             String dobError = studentService.validateDateOfBirth(user.getDateOfBirth());
             if (dobError != null) {
@@ -972,18 +989,9 @@ public class HallController {
 
             if (user != null && img != null && !img.isEmpty()) {
                 try {
-                    File imgDir;
-                    try {
-                        imgDir = new ClassPathResource("static/img").getFile();
-                    } catch (Exception e) {
-                        String projectDir = System.getProperty("user.dir");
-                        imgDir = new File(projectDir + File.separator + "src" + File.separator + "main" +
-                                File.separator + "resources" + File.separator + "static" + File.separator + "img");
-                    }
-
-                    if (!imgDir.exists()) {
-                        imgDir.mkdirs();
-                    }
+                    // Use persistent uploads/img/ dir — NEVER wiped by Maven
+                    File imgDir = new File(com.example.HAllTicket.config.WebConfig.getUploadsDir() + "img");
+                    if (!imgDir.exists()) imgDir.mkdirs();
 
                     String fileName = user.getId() + "_" + System.currentTimeMillis() + "_" + img.getOriginalFilename();
                     Path path = Paths.get(imgDir.getAbsolutePath() + File.separator + fileName);
@@ -992,7 +1000,7 @@ public class HallController {
 
                     user.setImageName(fileName);
                     studentService.updateStudent(user);
-                    logger.info("Image saved: {}", fileName);
+                    logger.info("Profile image saved to: {}", path);
                 } catch (Exception e) {
                     logger.error("Error during image upload: {}", e.getMessage(), e);
                 }
@@ -1478,19 +1486,36 @@ public class HallController {
         hall.setEmail(email);
         logger.info("Setting email in hall ticket - ID: {}, Email: {}", hall.getId(), email);
 
-        // Assign specific sequential seat number if it does not exist
+        // Assign alphabetical series seat number if not already assigned
         if (hall.getSeatNo() == null || hall.getSeatNo().isEmpty() || hall.getSeatNo().equals("null")) {
-            String prefix = "";
-            if (exam != null) {
-                prefix = (exam.getCourse() != null ? exam.getCourse() : "") + 
-                         (exam.getYear() != null ? exam.getYear() : "") + 
-                         (exam.getSemister() != null ? exam.getSemister() : "");
+            // Determine series letter from exam's position (sorted by id ascending)
+            // 1st exam → A, 2nd exam → B, 3rd exam → C, ...
+            String seriesLetter = "A"; // default
+            try {
+                List<ExamModel> allExams = examService.listAll();
+                // Sort by id to get consistent ordering
+                allExams.sort(java.util.Comparator.comparingInt(ExamModel::getId));
+                for (int i = 0; i < allExams.size(); i++) {
+                    if (allExams.get(i).getId() == (exam != null ? exam.getId() : -1)) {
+                        // Convert index to letter: 0→A, 1→B, ..., 25→Z, 26→AA, etc.
+                        int idx = i;
+                        if (idx < 26) {
+                            seriesLetter = String.valueOf((char) ('A' + idx));
+                        } else {
+                            // For more than 26 exams: AA, AB, ...
+                            seriesLetter = String.valueOf((char) ('A' + (idx / 26) - 1))
+                                         + String.valueOf((char) ('A' + (idx % 26)));
+                        }
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Could not determine exam series letter, defaulting to A: {}", e.getMessage());
             }
-            if (prefix.isEmpty()) {
-                 prefix = hall.getExamName() != null ? hall.getExamName().replaceAll("\\s+", "") : "EXAM";
-            }
-            prefix = prefix + "-S";
-            
+
+            String prefix = seriesLetter + "-";
+
+            // Find the next available seat number for this exam
             java.util.List<String> allocatedSeats = hallTicketService.findAllocatedSeatsByExamName(hall.getExamName());
             java.util.Set<Integer> usedNumbers = new java.util.HashSet<>();
             for (String seat : allocatedSeats) {
@@ -1499,18 +1524,21 @@ public class HallController {
                         String numStr = seat.substring(prefix.length());
                         usedNumbers.add(Integer.parseInt(numStr));
                     } catch (NumberFormatException e) {
-                        // ignore
+                        // ignore malformed entries
                     }
                 }
             }
-            
+
             int nextNum = 1;
             while (usedNumbers.contains(nextNum)) {
                 nextNum++;
             }
-            
-            hall.setSeatNo(prefix + nextNum);
-            logger.info("Generated new sequential seat number: {} for Hall Ticket ID: {}", hall.getSeatNo(), hall.getId());
+
+            // Zero-pad to 2 digits: A-01, A-02, ... A-99, A-100
+            String paddedNum = nextNum < 100 ? String.format("%02d", nextNum) : String.valueOf(nextNum);
+            hall.setSeatNo(prefix + paddedNum);
+            logger.info("Generated alphabetical seat number: {} for Hall Ticket ID: {} (Exam: {})",
+                    hall.getSeatNo(), hall.getId(), hall.getExamName());
         }
 
         // Also save it to database immediately to ensure it persists
@@ -1632,8 +1660,22 @@ public class HallController {
 
         // Validate and set SeatNo if missing (redundant check, just in case)
         if (hall.getSeatNo() == null || hall.getSeatNo().isEmpty() || hall.getSeatNo().equals("null")) {
-            // Generate a unique seat number fallback
-            String seatNo = "SEAT-" + (hall.getId() > 0 ? hall.getId() : System.currentTimeMillis());
+            // Fallback: generate alphabetical seat using exam position
+            String fallbackSeries = "A";
+            try {
+                if (exam != null) {
+                    List<ExamModel> allExams = examService.listAll();
+                    allExams.sort(java.util.Comparator.comparingInt(ExamModel::getId));
+                    for (int i = 0; i < allExams.size(); i++) {
+                        if (allExams.get(i).getId() == exam.getId()) {
+                            fallbackSeries = i < 26 ? String.valueOf((char) ('A' + i))
+                                    : String.valueOf((char) ('A' + (i / 26) - 1)) + String.valueOf((char) ('A' + (i % 26)));
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+            String seatNo = fallbackSeries + "-" + String.format("%02d", hall.getId() > 0 ? hall.getId() : 1);
             hall.setSeatNo(seatNo);
             logger.info("Generated fallback SeatNo {} for Hall Ticket ID: {}", hall.getSeatNo(), hall.getId());
         }

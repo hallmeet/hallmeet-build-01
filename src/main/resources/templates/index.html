@@ -221,6 +221,66 @@
         }
         .input-wrapper .toggle-eye:hover { color: #475569; }
 
+        /* Forgot Password Modal */
+        .fp-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .fp-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+        .fp-modal {
+            background: #fff;
+            border-radius: 20px;
+            padding: 36px 32px 28px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.18);
+            position: relative;
+        }
+        .fp-modal .fp-icon {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #84fab0, #8fd3f4);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 1.6rem; color: #0f172a;
+        }
+        .fp-modal h4 { font-size: 1.2rem; font-weight: 700; color: #1e293b; margin-bottom: 10px; }
+        .fp-modal p {
+            color: #64748b; font-size: 0.92rem; line-height: 1.6;
+            margin-bottom: 22px;
+        }
+        .fp-modal .fp-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #86efac;
+            color: #166534;
+            font-weight: 600; font-size: 0.85rem;
+            padding: 8px 18px; border-radius: 30px;
+            margin-bottom: 20px;
+        }
+        .fp-modal .fp-close-btn {
+            width: 100%; padding: 9px;
+            background: linear-gradient(135deg, #84fab0, #8fd3f4);
+            border: none; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 700;
+            color: #0f172a; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .fp-modal .fp-close-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+        .fp-modal .fp-x {
+            position: absolute; top: 14px; right: 18px;
+            font-size: 1.3rem; cursor: pointer; color: #94a3b8;
+            line-height: 1; background: none; border: none;
+        }
+        .fp-modal .fp-x:hover { color: #334155; }
+
         @media (max-width: 768px) {
             .main-pill-container { flex-direction: column; border-radius: 25px; gap: 15px; }
             .options-pill { flex-wrap: wrap; justify-content: center; border-radius: 25px; }
@@ -449,6 +509,16 @@
                     <button type="submit" class="submit-btn-custom student-btn">
                         <i class="fas fa-sign-in-alt"></i> Sign In
                     </button>
+
+                    <!-- Forgot Password Link -->
+                    <div style="text-align: center; margin-top: 12px;">
+                        <button type="button" onclick="document.getElementById('fpModal').classList.add('show')"
+                            style="background: none; border: none; color: #6366f1; font-size: 0.83rem;
+                                   font-weight: 600; cursor: pointer; text-decoration: underline;
+                                   font-family: inherit; padding: 0;">
+                            <i class="fas fa-lock" style="font-size:0.75rem;"></i> Forgot Password?
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -500,6 +570,28 @@
                 <h2>Admin Login</h2>
                 <p>Manage students, exams, and generate hall tickets from your admin dashboard</p>
             </div>
+        </div>
+    </div>
+
+    <!-- ═══════ FORGOT PASSWORD MODAL ═══════ -->
+    <div class="fp-overlay" id="fpModal" onclick="if(event.target===this) this.classList.remove('show')">
+        <div class="fp-modal">
+            <button class="fp-x" onclick="document.getElementById('fpModal').classList.remove('show')" aria-label="Close">&times;</button>
+            <div class="fp-icon">
+                <i class="fas fa-lock-open"></i>
+            </div>
+            <h4>Forgot Password?</h4>
+            <p>
+                Password reset is managed by your institution's administrator.<br>
+                Please contact your administrator to reset your password.
+            </p>
+            <div class="fp-badge">
+                <i class="fas fa-headset"></i>
+                Contact Administrator
+            </div>
+            <button class="fp-close-btn" onclick="document.getElementById('fpModal').classList.remove('show')">
+                <i class="fas fa-check"></i> Got it
+            </button>
         </div>
     </div>
 
@@ -602,6 +694,13 @@
                     $(this).remove();
                 });
             }, 5000);
+        });
+
+        // Close Forgot Password modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('fpModal').classList.remove('show');
+            }
         });
     </script>
 </body>

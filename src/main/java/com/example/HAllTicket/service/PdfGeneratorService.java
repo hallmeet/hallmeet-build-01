@@ -12,13 +12,78 @@ import com.lowagie.text.pdf.*;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PdfGeneratorService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PdfGeneratorService.class);
+
+    /**
+     * Robust image loader — checks persistent uploads/ dir first, then classpath fallbacks.
+     * Strategy 0: uploads/{path} — persistent, survives Maven rebuilds (primary)
+     * Strategy 1: ClassPathResource.getFile() — works in IDE
+     * Strategy 2: user.dir + src/main/resources/ — works in Maven run
+     * Strategy 3: ClassPathResource.getInputStream() as bytes — works everywhere
+     */
+    private Image loadImage(String classpathRelativePath) {
+        // Strategy 0: Persistent uploads/ directory (primary storage after upload)
+        try {
+            String uploadsDir = com.example.HAllTicket.config.WebConfig.getUploadsDir();
+            // classpathRelativePath is like "static/img/foo.jpg" or "static/qr/bar.jpg"
+            // Convert to "img/foo.jpg" or "qr/bar.jpg" for uploads dir
+            String relativePart = classpathRelativePath.replace("static/", "");
+            File f = new File(uploadsDir + relativePart);
+            if (f.exists()) {
+                logger.debug("Image loaded from uploads dir: {}", f.getAbsolutePath());
+                return Image.getInstance(f.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            logger.debug("Strategy 0 (uploads dir) failed for {}: {}", classpathRelativePath, e.getMessage());
+        }
+
+        // Strategy 1: ClassPathResource.getFile()
+        try {
+            File f = new ClassPathResource(classpathRelativePath).getFile();
+            if (f.exists()) {
+                logger.debug("Image loaded via ClassPathResource.getFile(): {}", f.getAbsolutePath());
+                return Image.getInstance(f.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            logger.debug("Strategy 1 failed for {}: {}", classpathRelativePath, e.getMessage());
+        }
+
+        // Strategy 2: Direct filesystem path (src/main/resources/...)
+        try {
+            String projectDir = System.getProperty("user.dir");
+            File f = new File(projectDir + File.separator + "src" + File.separator + "main"
+                    + File.separator + "resources" + File.separator
+                    + classpathRelativePath.replace("/", File.separator));
+            if (f.exists()) {
+                logger.debug("Image loaded via filesystem path: {}", f.getAbsolutePath());
+                return Image.getInstance(f.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            logger.debug("Strategy 2 failed for {}: {}", classpathRelativePath, e.getMessage());
+        }
+
+        // Strategy 3: InputStream as byte array (works in JAR and all environments)
+        try (InputStream is = new ClassPathResource(classpathRelativePath).getInputStream()) {
+            byte[] bytes = is.readAllBytes();
+            logger.debug("Image loaded via InputStream for: {}", classpathRelativePath);
+            return Image.getInstance(bytes);
+        } catch (Exception e) {
+            logger.warn("All strategies failed to load image: {}", classpathRelativePath);
+        }
+
+        return null;
+    }
 
     // --- Design System ---
     private static final Color COLOR_PRIMARY = new Color(79, 70, 229); // Indigo 600
@@ -93,14 +158,16 @@ public class PdfGeneratorService {
             boolean photoAdded = false;
             if (stud != null && stud.getImageName() != null && !stud.getImageName().isEmpty()) {
                 try {
-                    File imgFile = new ClassPathResource("static/img/" + stud.getImageName()).getFile();
-                    if (imgFile.exists()) {
-                        Image img = Image.getInstance(imgFile.getAbsolutePath());
+                    Image img = loadImage("static/img/" + stud.getImageName());
+                    if (img != null) {
                         img.scaleToFit(100, 120);
                         photoCell.addElement(img);
                         photoAdded = true;
+                        logger.info("Student photo loaded for PDF: {}", stud.getImageName());
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    logger.warn("Failed to add student photo to PDF: {}", e.getMessage());
+                }
             }
             if (!photoAdded) {
                 // Placeholder box
@@ -176,16 +243,20 @@ public class PdfGeneratorService {
             // QR Code
             PdfPCell qrCell = new PdfPCell();
             qrCell.setBorder(Rectangle.NO_BORDER);
-            if (hall.getQrName() != null) {
+            if (hall.getQrName() != null && !hall.getQrName().isEmpty()) {
                 try {
-                    File qrFile = new ClassPathResource("static/qr/" + hall.getQrName()).getFile();
-                    if (qrFile.exists()) {
-                        Image qr = Image.getInstance(qrFile.getAbsolutePath());
+                    Image qr = loadImage("static/qr/" + hall.getQrName());
+                    if (qr != null) {
                         qr.scaleToFit(80, 80);
                         qrCell.addElement(qr);
                         qrCell.addElement(new Paragraph("SCAN TO VERIFY", FONT_LABEL));
+                        logger.info("QR code loaded for PDF: {}", hall.getQrName());
+                    } else {
+                        qrCell.addElement(new Paragraph("QR N/A", FONT_LABEL));
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    logger.warn("Failed to add QR code to PDF: {}", e.getMessage());
+                }
             }
             footer.addCell(qrCell);
 
