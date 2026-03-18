@@ -31,6 +31,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.example.HAllTicket.model.AdminModel;
+import com.example.HAllTicket.config.WebConfig;
 import com.example.HAllTicket.model.CollegeModel;
 import com.example.HAllTicket.model.ExamModel;
 import com.example.HAllTicket.model.HallTicketModel;
@@ -1687,29 +1688,11 @@ public class HallController {
             BufferedImage bufferedImage = generateQRCodeImage(hall, baseUrl);
             String imagePath = "img-" + hall.getSeatNo().replaceAll("[^a-zA-Z0-9]", "-") + ".jpg";
 
-            // Use dynamic path that works in both IDE and JAR
-            File qrDir;
-            try {
-                // Works in development (IDE)
-                qrDir = new ClassPathResource("static/qr").getFile();
-                logger.info("Using IDE path: {}", qrDir.getAbsolutePath());
-            } catch (Exception e) {
-                // Works when running as JAR - use project directory or user home
-                String projectDir = System.getProperty("user.dir");
-                qrDir = new File(projectDir + File.separator + "src" + File.separator + "main" +
-                        File.separator + "resources" + File.separator + "static" + File.separator + "qr");
-                if (!qrDir.exists()) {
-                    // Fallback to user home directory
-                    String userHome = System.getProperty("user.home");
-                    qrDir = new File(userHome + File.separator + "HallTicket" + File.separator + "qr");
-                }
-                logger.info("Using JAR path: {}", qrDir.getAbsolutePath());
-            }
-
-            // Create directory if it doesn't exist
+            // Persist QR code in the external uploads directory for immediate availability
+            File qrDir = new File(WebConfig.getUploadsDir() + "qr");
             if (!qrDir.exists()) {
                 boolean created = qrDir.mkdirs();
-                logger.info("QR directory created: {} (success: {})", qrDir.getAbsolutePath(), created);
+                logger.info("Created missing QR directory: {}", qrDir.getAbsolutePath());
             }
 
             File outputfile = new File(qrDir, imagePath);

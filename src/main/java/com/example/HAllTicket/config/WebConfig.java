@@ -25,22 +25,22 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(@org.springframework.lang.NonNull ResourceHandlerRegistry registry) {
-        String uploadsPath = "file:" + getUploadsDir();
+        String uploadsPath = "file:///" + getUploadsDir().replace("\\", "/");
 
         // /img/** → uploads/img/ (persistent, survives restarts) + classpath fallback
         registry.addResourceHandler("/img/**")
                 .addResourceLocations(
-                    uploadsPath + "img" + File.separator,
+                    uploadsPath + "img/",
                     "classpath:/static/img/",
-                    "file:./src/main/resources/static/img/"
+                    "file:src/main/resources/static/img/"
                 );
 
         // /qr/** → uploads/qr/ (persistent, survives restarts) + classpath fallback
         registry.addResourceHandler("/qr/**")
                 .addResourceLocations(
-                    uploadsPath + "qr" + File.separator,
+                    uploadsPath + "qr/",
                     "classpath:/static/qr/",
-                    "file:./src/main/resources/static/qr/"
+                    "file:src/main/resources/static/qr/"
                 );
     }
 }
