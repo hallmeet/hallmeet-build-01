@@ -62,6 +62,7 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>Photo</th>
                                 <th>Full Name</th>
                                 <th>Email</th>
                                 <th>Mobile No</th>
@@ -76,6 +77,16 @@
                         <tbody>
                             <tr th:each="student, stat : ${liststudent}">
                                 <td th:text="${stat.count}"></td>
+                                <td>
+                                    <div th:if="${student.imageName != null and !student.imageName.isEmpty()}">
+                                        <img th:src="@{'/img/' + ${student.imageName}}" 
+                                             class="img-circle elevation-1"
+                                             style="width: 40px; height: 40px; object-fit: cover; border: 1px solid #dee2e6;">
+                                    </div>
+                                    <div th:unless="${student.imageName != null and !student.imageName.isEmpty()}">
+                                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                    </div>
+                                </td>
                                 <td th:text="${student.fullName}"></td>
                                 <td th:text="${student.email}"></td>
                                 <td th:text="${student.mobileNo}"></td>
