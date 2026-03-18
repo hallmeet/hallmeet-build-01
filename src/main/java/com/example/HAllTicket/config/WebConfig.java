@@ -5,6 +5,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -16,16 +17,28 @@ public class WebConfig implements WebMvcConfigurer {
      */
     public static String getUploadsDir() {
         String projectDir = System.getProperty("user.dir");
-        File uploadsDir = new File(projectDir + File.separator + "uploads");
-        if (!uploadsDir.exists()) {
-            uploadsDir.mkdirs();
+        try {
+            // Use absolute path for safety
+            File uploadsDir = new File(projectDir, "uploads");
+            if (!uploadsDir.exists()) {
+                uploadsDir.mkdirs();
+            }
+            // Absolute path with trailing slash
+            String path = uploadsDir.getAbsolutePath();
+            if (!path.endsWith(File.separator)) {
+                path += File.separator;
+            }
+            return path;
+        } catch (Exception e) {
+            // Fallback for extreme cases
+            return "uploads" + File.separator;
         }
-        return uploadsDir.getAbsolutePath() + File.separator;
     }
 
     @Override
     public void addResourceHandlers(@org.springframework.lang.NonNull ResourceHandlerRegistry registry) {
-        String uploadsPath = "file:///" + getUploadsDir().replace("\\", "/");
+        // Paths.get(...).toUri().toString() is the most robust way to get a file: URI
+        String uploadsPath = Paths.get(getUploadsDir()).toUri().toString();
 
         // /img/** → uploads/img/ (persistent, survives restarts) + classpath fallback
         registry.addResourceHandler("/img/**")
